@@ -26,7 +26,7 @@ def compute_risk_metrics(
     Args:
         symbol: NSE symbol
         period: Analysis period
-        risk_free_rate: Annual risk-free rate (default: 6.5% — India 10Y govt bond)
+        risk_free_rate: Annual risk-free rate (default: 6.5% - India 10Y govt bond)
 
     Returns:
         Dictionary of risk metrics.
@@ -186,7 +186,7 @@ def analyze_portfolio(
     # Portfolio-level beta
     port_beta = sum(stock_data[s]["beta"] * (portfolio[s] / 100) for s in stock_data)
 
-    # Portfolio VaR (simplified — weighted average)
+    # Portfolio VaR (simplified - weighted average)
     port_var = sum(stock_data[s]["var_95_daily"] * (portfolio[s] / 100) for s in stock_data)
     var_amount = abs(port_var / 100) * capital
 
@@ -283,9 +283,9 @@ def analyze_portfolio(
     if len(portfolio) < 8:
         report.append(f"  • Consider adding more stocks (currently {len(portfolio)}, recommend 8-15)")
     if port_sharpe < 1.0:
-        report.append(f"  • Portfolio Sharpe ({port_sharpe:.2f}) is below 1.0 — review weaker positions")
+        report.append(f"  • Portfolio Sharpe ({port_sharpe:.2f}) is below 1.0 - review weaker positions")
     if abs(port_dd) > 15:
-        report.append(f"  • Max drawdown of {port_dd:.1f}% is significant — consider hedging")
+        report.append(f"  • Max drawdown of {port_dd:.1f}% is significant - consider hedging")
     if not any([max_stock[1] > 30, max_sector[1] > 40, len(portfolio) < 8, port_sharpe < 1.0]):
         report.append("  • Portfolio is well-balanced. Continue monitoring.")
     report.append("")

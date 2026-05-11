@@ -28,7 +28,7 @@ requirements:
 
 # NSE Stock Analysis
 
-A production-grade Indian equity market analysis tool for NSE-listed stocks. Provides institutional-quality screening, swing trading analysis, ICT-based setups, backtesting, valuation, sector rotation, and risk management — all powered by public market data.
+A production-grade Indian equity market analysis tool for NSE-listed stocks. Provides institutional-quality screening, swing trading analysis, ICT-based setups, backtesting, valuation, sector rotation, and risk management - all powered by public market data.
 
 **Target users:** Swing traders, positional traders, value investors, and systematic analysts operating in Indian equity markets (NSE/BSE).
 
@@ -82,7 +82,7 @@ python scripts/screener.py \
 ```
 
 **Parameters:**
-- `--universe`: Stock universe — `NIFTY50`, `NIFTY100`, `NIFTY200`, `NIFTY500`, or comma-separated symbols
+- `--universe`: Stock universe - `NIFTY50`, `NIFTY100`, `NIFTY200`, `NIFTY500`, or comma-separated symbols
 - `--rsi-below` / `--rsi-above`: RSI(14) filter (0-100)
 - `--above-ema` / `--below-ema`: Price relative to EMA (9, 21, 50, 100, 200)
 - `--min-volume`: Minimum average daily volume
@@ -121,7 +121,7 @@ python scripts/swing_analyzer.py \
 
 **Parameters:**
 - `--symbol`: NSE symbol (e.g., RELIANCE, TCS, HDFCBANK)
-- `--period`: Analysis period — `1mo`, `3mo`, `6mo`, `1y`, `2y`
+- `--period`: Analysis period - `1mo`, `3mo`, `6mo`, `1y`, `2y`
 - `--ema-fast`: Fast EMA period (default: 9)
 - `--ema-mid`: Mid EMA period (default: 21)
 - `--ema-slow`: Slow EMA period (default: 55)
@@ -260,8 +260,8 @@ python scripts/backtest.py \
 
 **Parameters:**
 - `--symbol`: NSE symbol
-- `--strategy`: Strategy name — `triple-ema-crossover`, `rsi-mean-reversion`, `breakout-retest`, `ema-pullback`
-- `--period`: Backtest period — `6mo`, `1y`, `2y`, `5y`
+- `--strategy`: Strategy name - `triple-ema-crossover`, `rsi-mean-reversion`, `breakout-retest`, `ema-pullback`
+- `--period`: Backtest period - `6mo`, `1y`, `2y`, `5y`
 - `--capital`: Starting capital in INR (default: ₹10,00,000)
 - `--risk-per-trade`: Risk per trade as % of capital (default: 1%)
 - `--commission`: Brokerage + taxes per trade in % (default: 0.1%)
@@ -319,7 +319,7 @@ python scripts/valuation.py \
 
 **Parameters:**
 - `--symbol`: NSE symbol
-- `--method`: Valuation method — `dcf`, `pe-relative`, `pb-relative`, `graham`, `peg`, `all`
+- `--method`: Valuation method - `dcf`, `pe-relative`, `pb-relative`, `graham`, `peg`, `all`
 
 #### Step 2: Review Valuation Output
 
@@ -340,9 +340,9 @@ python scripts/valuation.py \
 
 #### Valuation Verdicts
 
-- 🟢 **Undervalued**: CMP < 80% of fair value — potential buying opportunity
-- 🟡 **Fairly Valued**: CMP within 80-120% of fair value — hold/accumulate
-- 🔴 **Overvalued**: CMP > 120% of fair value — avoid fresh entry
+- 🟢 **Undervalued**: CMP < 80% of fair value - potential buying opportunity
+- 🟡 **Fairly Valued**: CMP within 80-120% of fair value - hold/accumulate
+- 🔴 **Overvalued**: CMP > 120% of fair value - avoid fresh entry
 
 ---
 
@@ -437,7 +437,7 @@ python scripts/risk_score.py \
 Every analysis output must include:
 
 1. **Position Sizing:** Maximum 2% capital risk per trade
-2. **Stop-Loss:** Always defined — ATR-based (1.5-2x ATR) or swing structure based
+2. **Stop-Loss:** Always defined - ATR-based (1.5-2x ATR) or swing structure based
 3. **Risk-Reward:** Minimum 1:1.5 R:R for entry consideration
 4. **Portfolio Heat:** Maximum 6% total portfolio risk at any time
 5. **Sector Exposure:** Maximum 40% in any single sector
@@ -512,7 +512,7 @@ Every report must include:
 ### Calculation Errors
 - If insufficient data for an indicator (e.g., 200 EMA needs 200 data points), warn the user and use available data
 - If a valuation metric cannot be computed (e.g., negative earnings for PE), skip with explanation
-- Never output NaN/null — always replace with "N/A" and explain why
+- Never output NaN/null - always replace with "N/A" and explain why
 
 ### User Input Errors
 - Invalid symbol → suggest corrections
@@ -646,7 +646,7 @@ Fallback: [Alternative action taken, if any]
 📋 VERDICT: 🟢 FAIRLY VALUED TO SLIGHTLY UNDERVALUED
   Average Fair Value:   ₹1,510
   Current Price:        ₹1,456 (3.6% below fair value)
-  Margin of Safety:     3.6% (Thin — wait for dips for better entry)
+  Margin of Safety:     3.6% (Thin - wait for dips for better entry)
 
   Recommendation: ACCUMULATE on dips below ₹1,400
   Investment Horizon: 12-24 months

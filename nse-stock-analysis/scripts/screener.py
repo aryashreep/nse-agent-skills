@@ -450,7 +450,7 @@ def main():
     else:
         symbols = fetch_nifty_constituents(args.universe)
 
-    print(f"\n📊 NSE Screener — {args.scan.upper()} scan on {len(symbols)} stocks\n", file=sys.stderr)
+    print(f"\n📊 NSE Screener - {args.scan.upper()} scan on {len(symbols)} stocks\n", file=sys.stderr)
 
     if args.scan == "basic":
         results = screen_basic(

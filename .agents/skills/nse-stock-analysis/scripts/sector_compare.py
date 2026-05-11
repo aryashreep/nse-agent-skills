@@ -355,7 +355,7 @@ def main():
 
     if args.universe and args.rank_by:
         symbols = fetch_nifty_constituents(args.universe)
-        print(f"\n📊 Relative Strength Ranking — {args.universe} ({args.period}):\n", file=sys.stderr)
+        print(f"\n📊 Relative Strength Ranking - {args.universe} ({args.period}):\n", file=sys.stderr)
         result = rank_by_relative_strength(symbols, period=args.period, top_n=args.top)
         if result.empty:
             print("No data available for ranking.")

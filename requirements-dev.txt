@@ -1,4 +1,4 @@
-# Dev / CI — linting and type checking only
+# Dev / CI - linting and type checking only
 ruff>=0.4
 mypy>=1.10
 pandas-stubs

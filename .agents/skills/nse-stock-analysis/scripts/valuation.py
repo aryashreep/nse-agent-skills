@@ -147,7 +147,7 @@ def run_valuation(symbol: str, method: str = "all") -> str:
 
     Args:
         symbol: NSE symbol
-        method: Valuation method(s) — dcf, pe-relative, pb-relative, graham, peg, all
+        method: Valuation method(s) - dcf, pe-relative, pb-relative, graham, peg, all
 
     Returns:
         Formatted valuation report string.
@@ -229,13 +229,13 @@ def run_valuation(symbol: str, method: str = "all") -> str:
         report.append(f"  Margin of Safety:     {abs(margin):.1f}%")
 
         if margin > 20:
-            report.append(f"\n  Recommendation: 🟢 BUY — significant margin of safety")
+            report.append(f"\n  Recommendation: 🟢 BUY - significant margin of safety")
         elif margin > 0:
             report.append(f"\n  Recommendation: 🟡 ACCUMULATE on dips")
         elif margin > -20:
-            report.append(f"\n  Recommendation: 🟡 HOLD — fairly valued")
+            report.append(f"\n  Recommendation: 🟡 HOLD - fairly valued")
         else:
-            report.append(f"\n  Recommendation: 🔴 AVOID — expensive relative to fundamentals")
+            report.append(f"\n  Recommendation: 🔴 AVOID - expensive relative to fundamentals")
     report.append("")
 
     report.append("⚠️  This is NOT financial advice. Verify data independently.")

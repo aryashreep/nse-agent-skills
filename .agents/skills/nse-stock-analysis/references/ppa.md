@@ -29,7 +29,7 @@ IF Range Ratio < (N * 0.5):
 
 **Parameters:**
 - `N` (consolidation_days): Minimum days in consolidation (default: 10)
-- Range Ratio threshold: `N * 0.5` — tighter ranges get higher scores
+- Range Ratio threshold: `N * 0.5` - tighter ranges get higher scores
 
 ### Step 2: Detect Breakout
 
@@ -93,8 +93,8 @@ TOTAL: 0-100
 |-----------|----------|--------|
 | 80-100 | A+ Setup | Strong conviction entry |
 | 60-79 | A Setup | Entry with standard position size |
-| 40-59 | B Setup | Watch list — wait for confirmation |
-| < 40 | C Setup | Skip — insufficient conviction |
+| 40-59 | B Setup | Watch list - wait for confirmation |
+| < 40 | C Setup | Skip - insufficient conviction |
 
 ---
 
@@ -128,9 +128,9 @@ TOTAL: 0-100
 
 ## NSE-Specific Considerations
 
-1. **Circuit Limits:** Some stocks may hit upper circuit on breakout — consider partial entry before breakout
+1. **Circuit Limits:** Some stocks may hit upper circuit on breakout - consider partial entry before breakout
 2. **T+1 Settlement:** Be aware of settlement cycle for position sizing
-3. **NIFTY Index:** Check if NIFTY itself is in compression — sector rotation often follows
+3. **NIFTY Index:** Check if NIFTY itself is in compression - sector rotation often follows
 4. **Delivery Data:** High delivery % on breakout day is a strong confirmation for NSE stocks
 5. **FII/DII Data:** Cross-reference with institutional buying for additional conviction
 
