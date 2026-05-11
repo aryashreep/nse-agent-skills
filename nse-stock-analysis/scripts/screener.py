@@ -17,7 +17,6 @@ from data_fetcher import (
     fetch_nifty_constituents,
     fetch_ohlcv,
     fetch_stock_info,
-    format_inr,
     format_volume,
 )
 
@@ -67,7 +66,7 @@ def screen_basic(
 
     for i, symbol in enumerate(symbols):
         try:
-            print(f"  Screening {symbol} ({i+1}/{total})...", end="\r", file=sys.stderr)
+            print(f"  Screening {symbol} ({i + 1}/{total})...", end="\r", file=sys.stderr)
             df = fetch_ohlcv(symbol, period="1y")
             if len(df) < 50:
                 continue
@@ -169,7 +168,7 @@ def scan_triple_ema_crossover(
 
     for i, symbol in enumerate(symbols):
         try:
-            print(f"  Scanning {symbol} ({i+1}/{total})...", end="\r", file=sys.stderr)
+            print(f"  Scanning {symbol} ({i + 1}/{total})...", end="\r", file=sys.stderr)
             df = fetch_ohlcv(symbol, period="6mo")
             if len(df) < 60:
                 continue
@@ -191,19 +190,20 @@ def scan_triple_ema_crossover(
                     continue
 
                 # Bullish crossover: 9 EMA crosses above 21 EMA, both above 55 EMA
-                if (prev_ema9 <= prev_ema21 and ema9 > ema21 and
-                        ema9 > ema55 and ema21 > ema55):
+                if prev_ema9 <= prev_ema21 and ema9 > ema21 and ema9 > ema55 and ema21 > ema55:
                     vol_surge = row["VOL_RATIO"] if not pd.isna(row["VOL_RATIO"]) else 0
-                    results.append({
-                        "Symbol": symbol,
-                        "Crossover Date": recent.index[j].strftime("%Y-%m-%d"),
-                        "CMP": round(row["Close"], 2),
-                        "EMA9": round(ema9, 2),
-                        "EMA21": round(ema21, 2),
-                        "EMA55": round(ema55, 2),
-                        "Vol Surge": f"{vol_surge:.1f}x",
-                        "Signal": "🟢 BUY" if vol_surge > 1.5 else "🟡 WATCH",
-                    })
+                    results.append(
+                        {
+                            "Symbol": symbol,
+                            "Crossover Date": recent.index[j].strftime("%Y-%m-%d"),
+                            "CMP": round(row["Close"], 2),
+                            "EMA9": round(ema9, 2),
+                            "EMA21": round(ema21, 2),
+                            "EMA55": round(ema55, 2),
+                            "Vol Surge": f"{vol_surge:.1f}x",
+                            "Signal": "🟢 BUY" if vol_surge > 1.5 else "🟡 WATCH",
+                        }
+                    )
                     break  # Only latest crossover per stock
 
         except Exception as e:
@@ -235,7 +235,7 @@ def scan_volume_breakout(
 
     for i, symbol in enumerate(symbols):
         try:
-            print(f"  Scanning {symbol} ({i+1}/{total})...", end="\r", file=sys.stderr)
+            print(f"  Scanning {symbol} ({i + 1}/{total})...", end="\r", file=sys.stderr)
             df = fetch_ohlcv(symbol, period="3mo")
             if len(df) < 25:
                 continue
@@ -251,15 +251,17 @@ def scan_volume_breakout(
 
             if vol_ratio >= volume_multiplier and abs(pct_change) >= price_change_pct:
                 direction = "🟢 BULLISH" if pct_change > 0 else "🔴 BEARISH"
-                results.append({
-                    "Symbol": symbol,
-                    "CMP": round(latest["Close"], 2),
-                    "Change %": f"{pct_change:+.1f}%",
-                    "Vol Ratio": f"{vol_ratio:.1f}x",
-                    "Volume": format_volume(latest["Volume"]),
-                    "RSI": round(latest["RSI"], 1) if not pd.isna(latest["RSI"]) else "N/A",
-                    "Direction": direction,
-                })
+                results.append(
+                    {
+                        "Symbol": symbol,
+                        "CMP": round(latest["Close"], 2),
+                        "Change %": f"{pct_change:+.1f}%",
+                        "Vol Ratio": f"{vol_ratio:.1f}x",
+                        "Volume": format_volume(latest["Volume"]),
+                        "RSI": round(latest["RSI"], 1) if not pd.isna(latest["RSI"]) else "N/A",
+                        "Direction": direction,
+                    }
+                )
 
         except Exception as e:
             print(f"  ⚠️ Skipping {symbol}: {e}", file=sys.stderr)
@@ -291,7 +293,7 @@ def scan_ppa(
 
     for i, symbol in enumerate(symbols):
         try:
-            print(f"  Scanning {symbol} ({i+1}/{total})...", end="\r", file=sys.stderr)
+            print(f"  Scanning {symbol} ({i + 1}/{total})...", end="\r", file=sys.stderr)
             df = fetch_ohlcv(symbol, period="3mo")
             if len(df) < consolidation_days + 20:
                 continue
@@ -300,7 +302,7 @@ def scan_ppa(
             latest = df.iloc[-1]
 
             # Check consolidation: range within ATR for N days
-            consol_data = df.iloc[-(consolidation_days + 1):-1]
+            consol_data = df.iloc[-(consolidation_days + 1) : -1]
             consol_range = consol_data["High"].max() - consol_data["Low"].min()
             avg_atr = consol_data["ATR"].mean()
 
@@ -319,15 +321,17 @@ def scan_ppa(
                 vol_surge = latest["VOL_RATIO"] if not pd.isna(latest["VOL_RATIO"]) else 0
                 direction = "🟢 UP" if latest["Close"] > consol_data["High"].max() else "🔴 DOWN"
 
-                results.append({
-                    "Symbol": symbol,
-                    "CMP": round(latest["Close"], 2),
-                    "Consol Range": f"₹{consol_data['Low'].min():.0f}-₹{consol_data['High'].max():.0f}",
-                    "Consol Days": consolidation_days,
-                    "Breakout ATR": f"{today_range/avg_atr:.1f}x",
-                    "Vol Surge": f"{vol_surge:.1f}x",
-                    "Direction": direction,
-                })
+                results.append(
+                    {
+                        "Symbol": symbol,
+                        "CMP": round(latest["Close"], 2),
+                        "Consol Range": f"₹{consol_data['Low'].min():.0f}-₹{consol_data['High'].max():.0f}",
+                        "Consol Days": consolidation_days,
+                        "Breakout ATR": f"{today_range / avg_atr:.1f}x",
+                        "Vol Surge": f"{vol_surge:.1f}x",
+                        "Direction": direction,
+                    }
+                )
 
         except Exception as e:
             print(f"  ⚠️ Skipping {symbol}: {e}", file=sys.stderr)
@@ -360,7 +364,7 @@ def scan_delivery_breakout(
 
     for i, symbol in enumerate(symbols):
         try:
-            print(f"  Scanning {symbol} ({i+1}/{total})...", end="\r", file=sys.stderr)
+            print(f"  Scanning {symbol} ({i + 1}/{total})...", end="\r", file=sys.stderr)
             # Using volume-based proxy when delivery data unavailable
             df = fetch_ohlcv(symbol, period="3mo")
             if len(df) < 25:
@@ -381,14 +385,16 @@ def scan_delivery_breakout(
 
             rsi = latest["RSI"] if not pd.isna(latest["RSI"]) else 0
 
-            results.append({
-                "Symbol": symbol,
-                "CMP": round(latest["Close"], 2),
-                "Change %": f"{pct_change:+.1f}%",
-                "Vol Surge": f"{vol_ratio:.1f}x",
-                "RSI": round(rsi, 1),
-                "Signal": "🟢 ACCUMULATION" if vol_ratio > 2.0 else "🟡 WATCH",
-            })
+            results.append(
+                {
+                    "Symbol": symbol,
+                    "CMP": round(latest["Close"], 2),
+                    "Change %": f"{pct_change:+.1f}%",
+                    "Vol Surge": f"{vol_ratio:.1f}x",
+                    "RSI": round(rsi, 1),
+                    "Signal": "🟢 ACCUMULATION" if vol_ratio > 2.0 else "🟡 WATCH",
+                }
+            )
 
         except Exception as e:
             print(f"  ⚠️ Skipping {symbol}: {e}", file=sys.stderr)
@@ -400,12 +406,20 @@ def scan_delivery_breakout(
 
 def main():
     parser = argparse.ArgumentParser(description="NSE Stock Screener")
-    parser.add_argument("--universe", type=str, default="NIFTY50",
-                        help="Stock universe (NIFTY50, NIFTY100, NIFTY200, NIFTY500, NIFTY BANK, NIFTY IT, etc.)")
+    parser.add_argument(
+        "--universe",
+        type=str,
+        default="NIFTY50",
+        help="Stock universe (NIFTY50, NIFTY100, NIFTY200, NIFTY500, NIFTY BANK, NIFTY IT, etc.)",
+    )
     parser.add_argument("--symbols", type=str, help="Comma-separated symbols (overrides --universe)")
-    parser.add_argument("--scan", type=str, choices=[
-        "basic", "triple-ema-crossover", "volume-breakout", "ppa", "delivery-breakout"
-    ], default="basic", help="Scan type")
+    parser.add_argument(
+        "--scan",
+        type=str,
+        choices=["basic", "triple-ema-crossover", "volume-breakout", "ppa", "delivery-breakout"],
+        default="basic",
+        help="Scan type",
+    )
 
     # Basic screen filters
     parser.add_argument("--rsi-below", type=float, help="RSI below threshold")

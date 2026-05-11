@@ -47,6 +47,7 @@ def compute_risk_metrics(
     # Beta (vs NIFTY 50)
     try:
         import yfinance as yf
+
         nifty = yf.download("^NSEI", period=period, progress=False)
         if isinstance(nifty.columns, pd.MultiIndex):
             nifty.columns = nifty.columns.get_level_values(0)
@@ -243,7 +244,7 @@ def analyze_portfolio(
 
     report.append("📈 INDIVIDUAL STOCK METRICS")
     report.append(f"  {'Stock':<12} {'Beta':>6} {'Vol':>7} {'Sharpe':>7} {'MaxDD':>7} {'Risk':>6}")
-    report.append(f"  {'─'*12} {'─'*6} {'─'*7} {'─'*7} {'─'*7} {'─'*6}")
+    report.append(f"  {'─' * 12} {'─' * 6} {'─' * 7} {'─' * 7} {'─' * 7} {'─' * 6}")
     for symbol in stock_data:
         d = stock_data[symbol]
         e, _ = risk_rating(d["risk_score"])
@@ -255,16 +256,20 @@ def analyze_portfolio(
 
     report.append("⚖️  PORTFOLIO RISK METRICS")
     report.append(f"  {'Metric':<25} {'Value':>15} {'Rating':>15}")
-    report.append(f"  {'─'*25} {'─'*15} {'─'*15}")
+    report.append(f"  {'─' * 25} {'─' * 15} {'─' * 15}")
     report.append(f"  {'Portfolio Beta':<25} {port_beta:>15.2f} {metric_rating('beta', port_beta):>15}")
     report.append(f"  {'Value at Risk (95%)':<25} {format_inr(var_amount):>15} {'🟡 Moderate':>15}")
     report.append(f"  {'Max Drawdown':<25} {port_dd:>14.1f}% {metric_rating('max_drawdown', port_dd):>15}")
     report.append(f"  {'Sharpe Ratio':<25} {port_sharpe:>15.2f} {metric_rating('sharpe', port_sharpe):>15}")
     report.append(f"  {'Sortino Ratio':<25} {port_sortino:>15.2f} {metric_rating('sortino', port_sortino):>15}")
-    report.append(f"  {'Top Sector Exposure':<25} {f'{max_sector[1]:.0f}% {max_sector[0]}':>15} "
-                  f"{'🔴 High' if max_sector[1] > 40 else '🟢 OK':>15}")
-    report.append(f"  {'Largest Position':<25} {f'{max_stock[1]:.0f}% {max_stock[0]}':>15} "
-                  f"{'🔴 High' if max_stock[1] > 30 else '🟢 OK':>15}")
+    report.append(
+        f"  {'Top Sector Exposure':<25} {f'{max_sector[1]:.0f}% {max_sector[0]}':>15} "
+        f"{'🔴 High' if max_sector[1] > 40 else '🟢 OK':>15}"
+    )
+    report.append(
+        f"  {'Largest Position':<25} {f'{max_stock[1]:.0f}% {max_stock[0]}':>15} "
+        f"{'🔴 High' if max_stock[1] > 30 else '🟢 OK':>15}"
+    )
     report.append("")
     report.append(f"  {'OVERALL RISK SCORE':<25} {f'{port_risk}/100':>15} {emoji} {rating:>12}")
     report.append("")
@@ -282,7 +287,7 @@ def analyze_portfolio(
     if abs(port_dd) > 15:
         report.append(f"  • Max drawdown of {port_dd:.1f}% is significant — consider hedging")
     if not any([max_stock[1] > 30, max_sector[1] > 40, len(portfolio) < 8, port_sharpe < 1.0]):
-        report.append(f"  • Portfolio is well-balanced. Continue monitoring.")
+        report.append("  • Portfolio is well-balanced. Continue monitoring.")
     report.append("")
 
     report.append("⚠️  Risk metrics are based on historical data and do not predict future risk.")
@@ -295,8 +300,7 @@ def analyze_portfolio(
 def main():
     parser = argparse.ArgumentParser(description="NSE Risk Scoring & Portfolio Analytics")
     parser.add_argument("--symbol", type=str, help="Single stock risk analysis")
-    parser.add_argument("--portfolio", type=str,
-                        help="Portfolio: SYMBOL:weight,... (e.g., RELIANCE:30,TCS:25)")
+    parser.add_argument("--portfolio", type=str, help="Portfolio: SYMBOL:weight,... (e.g., RELIANCE:30,TCS:25)")
     parser.add_argument("--capital", type=float, default=1000000, help="Capital in INR")
     parser.add_argument("--period", type=str, default="1y", help="Analysis period")
     parser.add_argument("--output", type=str, default="text", choices=["text", "json"])
@@ -315,9 +319,13 @@ def main():
         print(f"  Volatility:      {metrics['volatility']:.1f}%  {metric_rating('volatility', metrics['volatility'])}")
         print(f"  Beta:            {metrics['beta']:.2f}  {metric_rating('beta', metrics['beta'])}")
         print(f"  VaR (95%):       {metrics['var_95_daily']:.2f}%/day")
-        print(f"  Max Drawdown:    {metrics['max_drawdown']:.1f}%  {metric_rating('max_drawdown', metrics['max_drawdown'])}")
+        print(
+            f"  Max Drawdown:    {metrics['max_drawdown']:.1f}%  {metric_rating('max_drawdown', metrics['max_drawdown'])}"
+        )
         print(f"  Sharpe Ratio:    {metrics['sharpe_ratio']:.2f}  {metric_rating('sharpe', metrics['sharpe_ratio'])}")
-        print(f"  Sortino Ratio:   {metrics['sortino_ratio']:.2f}  {metric_rating('sortino', metrics['sortino_ratio'])}")
+        print(
+            f"  Sortino Ratio:   {metrics['sortino_ratio']:.2f}  {metric_rating('sortino', metrics['sortino_ratio'])}"
+        )
         print(f"  Risk Score:      {metrics['risk_score']}/100  {emoji} {rating}")
         print("═" * 45)
         return

@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 import pandas_ta as ta
 
-from data_fetcher import fetch_nifty_constituents, fetch_ohlcv, format_inr
+from data_fetcher import fetch_nifty_constituents, fetch_ohlcv
 
 
 def compute_returns(symbol: str, period: str = "3mo") -> dict:
@@ -108,6 +108,7 @@ def rank_by_relative_strength(
         if nifty_df.empty:
             # Fallback: use ^NSEI
             import yfinance as yf
+
             nifty_df = yf.download("^NSEI", period=period, progress=False)
             if isinstance(nifty_df.columns, pd.MultiIndex):
                 nifty_df.columns = nifty_df.columns.get_level_values(0)
@@ -117,7 +118,7 @@ def rank_by_relative_strength(
 
     for i, symbol in enumerate(symbols):
         try:
-            print(f"  Ranking {symbol} ({i+1}/{total})...", end="\r", file=sys.stderr)
+            print(f"  Ranking {symbol} ({i + 1}/{total})...", end="\r", file=sys.stderr)
             data = compute_returns(symbol, period=period)
             if not data:
                 continue
@@ -126,17 +127,19 @@ def rank_by_relative_strength(
             vs_nifty = period_ret - nifty_return
 
             # RS Score: normalized 0-100 (will be adjusted after all stocks computed)
-            results.append({
-                "Symbol": symbol,
-                "CMP": f"₹{data['current_price']:,.2f}",
-                "Period Return": f"{period_ret:+.1f}%",
-                "vs NIFTY 50": f"{vs_nifty:+.1f}%",
-                "Momentum": data.get("momentum", 0),
-                "RSI": data.get("rsi", 0),
-                "Volatility": f"{data.get('volatility', 0):.1f}%",
-                "_return": period_ret,
-                "_momentum": data.get("momentum", 0),
-            })
+            results.append(
+                {
+                    "Symbol": symbol,
+                    "CMP": f"₹{data['current_price']:,.2f}",
+                    "Period Return": f"{period_ret:+.1f}%",
+                    "vs NIFTY 50": f"{vs_nifty:+.1f}%",
+                    "Momentum": data.get("momentum", 0),
+                    "RSI": data.get("rsi", 0),
+                    "Volatility": f"{data.get('volatility', 0):.1f}%",
+                    "_return": period_ret,
+                    "_momentum": data.get("momentum", 0),
+                }
+            )
         except Exception as e:
             print(f"  ⚠️ Skipping {symbol}: {e}", file=sys.stderr)
             continue
@@ -154,9 +157,7 @@ def rank_by_relative_strength(
     df["RS Score"] = df["RS Score"].round(1)
 
     # Trend emoji
-    df["Trend"] = df["_return"].apply(
-        lambda x: "🟢 Strong" if x > 10 else "🟡 Moderate" if x > 0 else "🔴 Weak"
-    )
+    df["Trend"] = df["_return"].apply(lambda x: "🟢 Strong" if x > 10 else "🟡 Moderate" if x > 0 else "🔴 Weak")
 
     # Sort and select top N
     df = df.sort_values("RS Score", ascending=False).head(top_n)
@@ -210,6 +211,7 @@ def compare_sectors(
 
         try:
             import yfinance as yf
+
             df = yf.download(ticker, period=period, progress=False)
             if isinstance(df.columns, pd.MultiIndex):
                 df.columns = df.columns.get_level_values(0)
@@ -219,12 +221,14 @@ def compare_sectors(
             close = df["Close"]
             period_ret = ((close.iloc[-1] / close.iloc[0]) - 1) * 100
 
-            results.append({
-                "Sector": sector_upper,
-                "Current": f"{close.iloc[-1]:,.0f}",
-                "Return": f"{period_ret:+.1f}%",
-                "_return": period_ret,
-            })
+            results.append(
+                {
+                    "Sector": sector_upper,
+                    "Current": f"{close.iloc[-1]:,.0f}",
+                    "Return": f"{period_ret:+.1f}%",
+                    "_return": period_ret,
+                }
+            )
         except Exception as e:
             print(f"  ⚠️ Error fetching {sector}: {e}", file=sys.stderr)
 
@@ -234,9 +238,7 @@ def compare_sectors(
     df = pd.DataFrame(results)
     df = df.sort_values("_return", ascending=False)
     df["Rank"] = range(1, len(df) + 1)
-    df["Trend"] = df["_return"].apply(
-        lambda x: "🟢 Leading" if x > 5 else "🟡 Neutral" if x > -5 else "🔴 Lagging"
-    )
+    df["Trend"] = df["_return"].apply(lambda x: "🟢 Leading" if x > 5 else "🟡 Neutral" if x > -5 else "🔴 Lagging")
     df = df.drop(columns=["_return"])
     return df[["Rank", "Sector", "Current", "Return", "Trend"]]
 
@@ -248,8 +250,14 @@ def sector_rotation_quadrant(period: str = "6mo") -> str:
     Based on momentum and relative strength change.
     """
     sectors = [
-        "NIFTY IT", "NIFTY BANK", "NIFTY PHARMA", "NIFTY FMCG",
-        "NIFTY AUTO", "NIFTY METAL", "NIFTY ENERGY", "NIFTY REALTY",
+        "NIFTY IT",
+        "NIFTY BANK",
+        "NIFTY PHARMA",
+        "NIFTY FMCG",
+        "NIFTY AUTO",
+        "NIFTY METAL",
+        "NIFTY ENERGY",
+        "NIFTY REALTY",
     ]
 
     sector_tickers = {
@@ -271,6 +279,7 @@ def sector_rotation_quadrant(period: str = "6mo") -> str:
             continue
         try:
             import yfinance as yf
+
             df = yf.download(ticker, period=period, progress=False)
             if isinstance(df.columns, pd.MultiIndex):
                 df.columns = df.columns.get_level_values(0)
@@ -329,8 +338,7 @@ def main():
     parser = argparse.ArgumentParser(description="NSE Sector Comparison & Relative Strength")
     parser.add_argument("--sectors", type=str, help="Comma-separated sector indices")
     parser.add_argument("--universe", type=str, help="Stock universe for RS ranking")
-    parser.add_argument("--rank-by", type=str, choices=["relative-strength"],
-                        help="Ranking method")
+    parser.add_argument("--rank-by", type=str, choices=["relative-strength"], help="Ranking method")
     parser.add_argument("--period", type=str, default="3mo", help="Analysis period")
     parser.add_argument("--benchmark", type=str, default="NIFTY 50", help="Benchmark index")
     parser.add_argument("--top", type=int, default=10, help="Top N stocks to show")

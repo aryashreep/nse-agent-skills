@@ -8,7 +8,6 @@ Strategies: Triple EMA Crossover, RSI Mean Reversion, Breakout Retest, EMA Pullb
 import argparse
 import sys
 from datetime import datetime
-from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -59,16 +58,18 @@ def strategy_triple_ema_crossover(df: pd.DataFrame) -> pd.DataFrame:
             continue
 
         # Buy signal
-        if (prev["EMA9"] <= prev["EMA21"] and
-                curr["EMA9"] > curr["EMA21"] and
-                curr["EMA9"] > curr["EMA55"] and
-                curr["EMA21"] > curr["EMA55"]):
+        if (
+            prev["EMA9"] <= prev["EMA21"]
+            and curr["EMA9"] > curr["EMA21"]
+            and curr["EMA9"] > curr["EMA55"]
+            and curr["EMA21"] > curr["EMA55"]
+        ):
             vol_ok = curr["VOL_RATIO"] > 1.3 if not pd.isna(curr["VOL_RATIO"]) else True
             if vol_ok:
                 df.iloc[i, df.columns.get_loc("signal")] = 1
 
         # Sell signal
-        elif (prev["EMA9"] >= prev["EMA21"] and curr["EMA9"] < curr["EMA21"]):
+        elif prev["EMA9"] >= prev["EMA21"] and curr["EMA9"] < curr["EMA21"]:
             df.iloc[i, df.columns.get_loc("signal")] = -1
         elif curr["Close"] < curr["EMA55"]:
             df.iloc[i, df.columns.get_loc("signal")] = -1
@@ -115,7 +116,6 @@ def strategy_breakout_retest(df: pd.DataFrame) -> pd.DataFrame:
     for i in range(2, len(df)):
         curr = df.iloc[i]
         prev = df.iloc[i - 1]
-        prev2 = df.iloc[i - 2]
 
         if pd.isna(curr["HIGHEST_20"]):
             continue
@@ -250,16 +250,18 @@ def run_backtest(
             current_capital += pnl
             holding_days = (date - position["entry_date"]).days
 
-            trades.append({
-                "entry_date": position["entry_date"].strftime("%Y-%m-%d"),
-                "exit_date": date.strftime("%Y-%m-%d"),
-                "entry_price": round(position["entry_price"], 2),
-                "exit_price": round(exit_price, 2),
-                "qty": position["qty"],
-                "pnl": round(pnl, 2),
-                "return_pct": round((exit_price / position["entry_price"] - 1) * 100, 2),
-                "holding_days": holding_days,
-            })
+            trades.append(
+                {
+                    "entry_date": position["entry_date"].strftime("%Y-%m-%d"),
+                    "exit_date": date.strftime("%Y-%m-%d"),
+                    "entry_price": round(position["entry_price"], 2),
+                    "exit_price": round(exit_price, 2),
+                    "qty": position["qty"],
+                    "pnl": round(pnl, 2),
+                    "return_pct": round((exit_price / position["entry_price"] - 1) * 100, 2),
+                    "holding_days": holding_days,
+                }
+            )
             position = None
 
         elif position is not None:
@@ -273,17 +275,19 @@ def run_backtest(
                 current_capital += pnl
                 holding_days = (date - position["entry_date"]).days
 
-                trades.append({
-                    "entry_date": position["entry_date"].strftime("%Y-%m-%d"),
-                    "exit_date": date.strftime("%Y-%m-%d"),
-                    "entry_price": round(position["entry_price"], 2),
-                    "exit_price": round(exit_price, 2),
-                    "qty": position["qty"],
-                    "pnl": round(pnl, 2),
-                    "return_pct": round((exit_price / position["entry_price"] - 1) * 100, 2),
-                    "holding_days": holding_days,
-                    "stopped_out": True,
-                })
+                trades.append(
+                    {
+                        "entry_date": position["entry_date"].strftime("%Y-%m-%d"),
+                        "exit_date": date.strftime("%Y-%m-%d"),
+                        "entry_price": round(position["entry_price"], 2),
+                        "exit_price": round(exit_price, 2),
+                        "qty": position["qty"],
+                        "pnl": round(pnl, 2),
+                        "return_pct": round((exit_price / position["entry_price"] - 1) * 100, 2),
+                        "holding_days": holding_days,
+                        "stopped_out": True,
+                    }
+                )
                 position = None
 
     # Close any open position at last close
@@ -293,17 +297,19 @@ def run_backtest(
         pnl = (exit_price - position["entry_price"]) * position["qty"]
         pnl -= position["entry_commission"] + commission
         current_capital += pnl
-        trades.append({
-            "entry_date": position["entry_date"].strftime("%Y-%m-%d"),
-            "exit_date": df.index[-1].strftime("%Y-%m-%d"),
-            "entry_price": round(position["entry_price"], 2),
-            "exit_price": round(exit_price, 2),
-            "qty": position["qty"],
-            "pnl": round(pnl, 2),
-            "return_pct": round((exit_price / position["entry_price"] - 1) * 100, 2),
-            "holding_days": (df.index[-1] - position["entry_date"]).days,
-            "open_trade": True,
-        })
+        trades.append(
+            {
+                "entry_date": position["entry_date"].strftime("%Y-%m-%d"),
+                "exit_date": df.index[-1].strftime("%Y-%m-%d"),
+                "entry_price": round(position["entry_price"], 2),
+                "exit_price": round(exit_price, 2),
+                "qty": position["qty"],
+                "pnl": round(pnl, 2),
+                "return_pct": round((exit_price / position["entry_price"] - 1) * 100, 2),
+                "holding_days": (df.index[-1] - position["entry_date"]).days,
+                "open_trade": True,
+            }
+        )
 
     # Compute metrics
     total_trades = len(trades)
@@ -325,9 +331,11 @@ def run_backtest(
 
     avg_win = np.mean([t["pnl"] for t in winning_trades]) if winning_trades else 0
     avg_loss = abs(np.mean([t["pnl"] for t in losing_trades])) if losing_trades else 1
-    profit_factor = (sum(t["pnl"] for t in winning_trades) /
-                     abs(sum(t["pnl"] for t in losing_trades))) if losing_trades and sum(
-        t["pnl"] for t in losing_trades) != 0 else float("inf")
+    profit_factor = (
+        (sum(t["pnl"] for t in winning_trades) / abs(sum(t["pnl"] for t in losing_trades)))
+        if losing_trades and sum(t["pnl"] for t in losing_trades) != 0
+        else float("inf")
+    )
 
     avg_holding = np.mean([t["holding_days"] for t in trades])
 
@@ -343,7 +351,9 @@ def run_backtest(
     # Sharpe (simplified)
     trade_returns = [t["return_pct"] for t in trades]
     if len(trade_returns) > 1:
-        sharpe = np.mean(trade_returns) / np.std(trade_returns) * np.sqrt(len(trade_returns) / years) if years > 0 else 0
+        sharpe = (
+            np.mean(trade_returns) / np.std(trade_returns) * np.sqrt(len(trade_returns) / years) if years > 0 else 0
+        )
     else:
         sharpe = 0
 
@@ -402,9 +412,8 @@ def format_backtest_report(results: dict) -> str:
     if trades:
         report.append("📋 RECENT TRADES (last 10):")
         report.append(f"  {'Entry Date':<12} {'Exit Date':<12} {'Entry':>8} {'Exit':>8} {'P&L':>10} {'Ret':>7}")
-        report.append(f"  {'─'*12} {'─'*12} {'─'*8} {'─'*8} {'─'*10} {'─'*7}")
+        report.append(f"  {'─' * 12} {'─' * 12} {'─' * 8} {'─' * 8} {'─' * 10} {'─' * 7}")
         for t in trades[-10:]:
-            pnl_color = "+" if t["pnl"] > 0 else ""
             report.append(
                 f"  {t['entry_date']:<12} {t['exit_date']:<12} "
                 f"₹{t['entry_price']:>7,.0f} ₹{t['exit_price']:>7,.0f} "
@@ -421,9 +430,9 @@ def format_backtest_report(results: dict) -> str:
 def main():
     parser = argparse.ArgumentParser(description="NSE Strategy Backtesting Engine")
     parser.add_argument("--symbol", type=str, required=True, help="NSE stock symbol")
-    parser.add_argument("--strategy", type=str, required=True,
-                        choices=list(STRATEGIES.keys()),
-                        help="Trading strategy to backtest")
+    parser.add_argument(
+        "--strategy", type=str, required=True, choices=list(STRATEGIES.keys()), help="Trading strategy to backtest"
+    )
     parser.add_argument("--period", type=str, default="2y", help="Backtest period")
     parser.add_argument("--capital", type=float, default=1000000, help="Starting capital (INR)")
     parser.add_argument("--risk-per-trade", type=float, default=1.0, help="Risk per trade (%)")
@@ -457,6 +466,7 @@ def main():
 
     if args.output == "json":
         import json
+
         # Remove trade list for cleaner JSON
         clean = {k: v for k, v in results.items() if k != "trades"}
         print(json.dumps(clean, indent=2))

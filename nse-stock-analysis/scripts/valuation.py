@@ -6,11 +6,7 @@ Fundamental valuation using DCF, PE/PB multiples, Graham Number, and PEG ratio.
 
 import argparse
 import math
-import sys
 from datetime import datetime
-
-import numpy as np
-import pandas as pd
 
 from data_fetcher import fetch_stock_info, format_inr
 
@@ -76,7 +72,7 @@ def simple_dcf(
     projected_eps = eps
 
     for year in range(1, projection_years + 1):
-        projected_eps *= (1 + growth_rate)
+        projected_eps *= 1 + growth_rate
         # Taper growth rate in later years
         if year > 5:
             growth_rate *= 0.9
@@ -165,7 +161,6 @@ def run_valuation(symbol: str, method: str = "all") -> str:
     sector = info.get("sector", "Unknown")
     earnings_growth = info.get("earnings_growth", 0)
     revenue_growth = info.get("revenue_growth", 0)
-    market_cap_cr = info.get("market_cap_cr", 0)
 
     industry_pe = get_industry_pe(sector)
 
@@ -198,44 +193,52 @@ def run_valuation(symbol: str, method: str = "all") -> str:
     report.append(f"  Market Cap:       {format_inr(info['market_cap'])}")
     report.append(f"  PE Ratio (TTM):   {f'{pe:.1f}x' if pe else 'N/A'} (Industry: {industry_pe:.1f}x)")
     report.append(f"  PB Ratio:         {f'{pb:.1f}x' if pb else 'N/A'}")
-    report.append(f"  ROE:              {f'{roe*100:.1f}%' if roe else 'N/A'}")
+    report.append(f"  ROE:              {f'{roe * 100:.1f}%' if roe else 'N/A'}")
     report.append(f"  Debt/Equity:      {f'{de:.2f}' if de else 'N/A'}")
-    report.append(f"  Dividend Yield:   {f'{div_yield*100:.1f}%' if div_yield else 'N/A'}")
+    report.append(f"  Dividend Yield:   {f'{div_yield * 100:.1f}%' if div_yield else 'N/A'}")
     report.append(f"  EPS (TTM):        {f'₹{eps:.2f}' if eps else 'N/A'}")
-    report.append(f"  Revenue Growth:   {f'{revenue_growth*100:.1f}%' if revenue_growth else 'N/A'}")
-    report.append(f"  Earnings Growth:  {f'{earnings_growth*100:.1f}%' if earnings_growth else 'N/A'}")
+    report.append(f"  Revenue Growth:   {f'{revenue_growth * 100:.1f}%' if revenue_growth else 'N/A'}")
+    report.append(f"  Earnings Growth:  {f'{earnings_growth * 100:.1f}%' if earnings_growth else 'N/A'}")
     report.append("")
 
     report.append("💰 VALUATION MODELS")
     if graham:
         g_emoji, _ = valuation_verdict(cmp, graham)
-        report.append(f"  Graham Number:        ₹{graham:,.2f} (CMP: ₹{cmp:,.2f} → {g_emoji} {'Below' if cmp < graham else 'Above'})")
+        report.append(
+            f"  Graham Number:        ₹{graham:,.2f} (CMP: ₹{cmp:,.2f} → {g_emoji} {'Below' if cmp < graham else 'Above'})"
+        )
     if pe_rel:
         p_emoji, _ = valuation_verdict(cmp, pe_rel)
-        report.append(f"  PE Relative Value:    ₹{pe_rel:,.2f} (CMP: ₹{cmp:,.2f} → {p_emoji} {'Below' if cmp < pe_rel else 'Above'})")
+        report.append(
+            f"  PE Relative Value:    ₹{pe_rel:,.2f} (CMP: ₹{cmp:,.2f} → {p_emoji} {'Below' if cmp < pe_rel else 'Above'})"
+        )
     if peg:
         peg_status = "🟢 Undervalued" if peg < 1 else "🟡 Fair" if peg < 2 else "🔴 Overvalued"
         report.append(f"  PEG Ratio:            {peg:.2f} → {peg_status}")
     if dcf_value:
         d_emoji, _ = valuation_verdict(cmp, dcf_value)
-        report.append(f"  DCF Fair Value:       ₹{dcf_value:,.2f} (CMP: ₹{cmp:,.2f} → {d_emoji} {'Below' if cmp < dcf_value else 'Above'})")
+        report.append(
+            f"  DCF Fair Value:       ₹{dcf_value:,.2f} (CMP: ₹{cmp:,.2f} → {d_emoji} {'Below' if cmp < dcf_value else 'Above'})"
+        )
     report.append("")
 
     report.append(f"📋 VERDICT: {emoji} {verdict}")
     if avg_fair_value > 0:
         margin = ((avg_fair_value - cmp) / avg_fair_value) * 100
         report.append(f"  Average Fair Value:   ₹{avg_fair_value:,.2f}")
-        report.append(f"  Current Price:        ₹{cmp:,.2f} ({margin:+.1f}% {'below' if margin > 0 else 'above'} fair value)")
+        report.append(
+            f"  Current Price:        ₹{cmp:,.2f} ({margin:+.1f}% {'below' if margin > 0 else 'above'} fair value)"
+        )
         report.append(f"  Margin of Safety:     {abs(margin):.1f}%")
 
         if margin > 20:
-            report.append(f"\n  Recommendation: 🟢 BUY — significant margin of safety")
+            report.append("\n  Recommendation: 🟢 BUY — significant margin of safety")
         elif margin > 0:
-            report.append(f"\n  Recommendation: 🟡 ACCUMULATE on dips")
+            report.append("\n  Recommendation: 🟡 ACCUMULATE on dips")
         elif margin > -20:
-            report.append(f"\n  Recommendation: 🟡 HOLD — fairly valued")
+            report.append("\n  Recommendation: 🟡 HOLD — fairly valued")
         else:
-            report.append(f"\n  Recommendation: 🔴 AVOID — expensive relative to fundamentals")
+            report.append("\n  Recommendation: 🔴 AVOID — expensive relative to fundamentals")
     report.append("")
 
     report.append("⚠️  This is NOT financial advice. Verify data independently.")
@@ -248,9 +251,13 @@ def run_valuation(symbol: str, method: str = "all") -> str:
 def main():
     parser = argparse.ArgumentParser(description="NSE Stock Valuation Analyzer")
     parser.add_argument("--symbol", type=str, required=True, help="NSE stock symbol")
-    parser.add_argument("--method", type=str, default="all",
-                        choices=["all", "dcf", "pe-relative", "pb-relative", "graham", "peg"],
-                        help="Valuation method")
+    parser.add_argument(
+        "--method",
+        type=str,
+        default="all",
+        choices=["all", "dcf", "pe-relative", "pb-relative", "graham", "peg"],
+        help="Valuation method",
+    )
     parser.add_argument("--discount-rate", type=float, default=0.12, help="Discount rate for DCF")
     parser.add_argument("--growth-rate", type=float, help="Override growth rate for DCF")
 

@@ -8,10 +8,8 @@ Handles OHLCV, delivery data, FII/DII flows, and corporate actions.
 import argparse
 import json
 import sys
-from datetime import datetime, timedelta
 from typing import Optional
 
-import numpy as np
 import pandas as pd
 import yfinance as yf
 
@@ -140,9 +138,7 @@ def fetch_fii_dii(period_days: int = 30) -> pd.DataFrame:
     if nse_get_fii_dii is None:
         print("⚠️ nsepython not available. Using sample FII/DII data.", file=sys.stderr)
         # Return empty DataFrame with correct schema
-        return pd.DataFrame(columns=[
-            "date", "fii_buy", "fii_sell", "fii_net", "dii_buy", "dii_sell", "dii_net"
-        ])
+        return pd.DataFrame(columns=["date", "fii_buy", "fii_sell", "fii_net", "dii_buy", "dii_sell", "dii_net"])
     try:
         data = nse_get_fii_dii()
         df = pd.DataFrame(data)
@@ -165,32 +161,97 @@ def fetch_nifty_constituents(index: str = "NIFTY 50") -> list[str]:
     """
     index_map = {
         "NIFTY50": [
-            "RELIANCE", "TCS", "HDFCBANK", "INFY", "ICICIBANK", "HINDUNILVR",
-            "SBIN", "BHARTIARTL", "ITC", "KOTAKBANK", "LT", "AXISBANK",
-            "BAJFINANCE", "ASIANPAINT", "MARUTI", "HCLTECH", "TITAN",
-            "SUNPHARMA", "TATAMOTORS", "ULTRACEMCO", "WIPRO", "NESTLEIND",
-            "NTPC", "POWERGRID", "M&M", "JSWSTEEL", "ADANIENT", "ADANIPORTS",
-            "TATASTEEL", "BAJAJFINSV", "TECHM", "ONGC", "HDFCLIFE",
-            "DIVISLAB", "COALINDIA", "GRASIM", "BPCL", "DRREDDY",
-            "CIPLA", "APOLLOHOSP", "EICHERMOT", "TATACONSUM", "SBILIFE",
-            "BRITANNIA", "HEROMOTOCO", "INDUSINDBK", "BAJAJ-AUTO",
-            "HINDALCO", "UPL", "LTIM",
+            "RELIANCE",
+            "TCS",
+            "HDFCBANK",
+            "INFY",
+            "ICICIBANK",
+            "HINDUNILVR",
+            "SBIN",
+            "BHARTIARTL",
+            "ITC",
+            "KOTAKBANK",
+            "LT",
+            "AXISBANK",
+            "BAJFINANCE",
+            "ASIANPAINT",
+            "MARUTI",
+            "HCLTECH",
+            "TITAN",
+            "SUNPHARMA",
+            "TATAMOTORS",
+            "ULTRACEMCO",
+            "WIPRO",
+            "NESTLEIND",
+            "NTPC",
+            "POWERGRID",
+            "M&M",
+            "JSWSTEEL",
+            "ADANIENT",
+            "ADANIPORTS",
+            "TATASTEEL",
+            "BAJAJFINSV",
+            "TECHM",
+            "ONGC",
+            "HDFCLIFE",
+            "DIVISLAB",
+            "COALINDIA",
+            "GRASIM",
+            "BPCL",
+            "DRREDDY",
+            "CIPLA",
+            "APOLLOHOSP",
+            "EICHERMOT",
+            "TATACONSUM",
+            "SBILIFE",
+            "BRITANNIA",
+            "HEROMOTOCO",
+            "INDUSINDBK",
+            "BAJAJ-AUTO",
+            "HINDALCO",
+            "UPL",
+            "LTIM",
         ],
         "NIFTY100": [],  # Extend as needed
         "NIFTY200": [],
         "NIFTY500": [],
         "NIFTY BANK": [
-            "HDFCBANK", "ICICIBANK", "SBIN", "KOTAKBANK", "AXISBANK",
-            "INDUSINDBK", "BANKBARODA", "PNB", "FEDERALBNK", "IDFCFIRSTB",
-            "BANDHANBNK", "AUBANK",
+            "HDFCBANK",
+            "ICICIBANK",
+            "SBIN",
+            "KOTAKBANK",
+            "AXISBANK",
+            "INDUSINDBK",
+            "BANKBARODA",
+            "PNB",
+            "FEDERALBNK",
+            "IDFCFIRSTB",
+            "BANDHANBNK",
+            "AUBANK",
         ],
         "NIFTY IT": [
-            "TCS", "INFY", "HCLTECH", "WIPRO", "TECHM", "LTIM",
-            "MPHASIS", "COFORGE", "PERSISTENT", "LTTS",
+            "TCS",
+            "INFY",
+            "HCLTECH",
+            "WIPRO",
+            "TECHM",
+            "LTIM",
+            "MPHASIS",
+            "COFORGE",
+            "PERSISTENT",
+            "LTTS",
         ],
         "NIFTY PHARMA": [
-            "SUNPHARMA", "DRREDDY", "CIPLA", "DIVISLAB", "APOLLOHOSP",
-            "BIOCON", "LUPIN", "AUROPHARMA", "TORNTPHARM", "ALKEM",
+            "SUNPHARMA",
+            "DRREDDY",
+            "CIPLA",
+            "DIVISLAB",
+            "APOLLOHOSP",
+            "BIOCON",
+            "LUPIN",
+            "AUROPHARMA",
+            "TORNTPHARM",
+            "ALKEM",
         ],
     }
     # Normalize index name
@@ -233,14 +294,18 @@ def fetch_delivery_data(symbol: str, days: int = 20) -> pd.DataFrame:
             data = nsefetch(url)
             if data and "data" in data:
                 df = pd.DataFrame(data["data"])
-                return df[["CH_TIMESTAMP", "DELIV_QTY", "TTL_TRD_QNTY", "DELIV_PER"]].rename(
-                    columns={
-                        "CH_TIMESTAMP": "date",
-                        "DELIV_QTY": "delivery_qty",
-                        "TTL_TRD_QNTY": "traded_qty",
-                        "DELIV_PER": "delivery_pct",
-                    }
-                ).head(days)
+                return (
+                    df[["CH_TIMESTAMP", "DELIV_QTY", "TTL_TRD_QNTY", "DELIV_PER"]]
+                    .rename(
+                        columns={
+                            "CH_TIMESTAMP": "date",
+                            "DELIV_QTY": "delivery_qty",
+                            "TTL_TRD_QNTY": "traded_qty",
+                            "DELIV_PER": "delivery_pct",
+                        }
+                    )
+                    .head(days)
+                )
         except Exception:
             pass
 
@@ -254,9 +319,9 @@ def format_inr(value: float) -> str:
     if value is None:
         return "N/A"
     if abs(value) >= 1e7:
-        return f"₹{value/1e7:,.2f} Cr"
+        return f"₹{value / 1e7:,.2f} Cr"
     if abs(value) >= 1e5:
-        return f"₹{value/1e5:,.2f} L"
+        return f"₹{value / 1e5:,.2f} L"
     return f"₹{value:,.2f}"
 
 
@@ -265,11 +330,11 @@ def format_volume(value: float) -> str:
     if value is None:
         return "N/A"
     if abs(value) >= 1e7:
-        return f"{value/1e7:.1f}Cr"
+        return f"{value / 1e7:.1f}Cr"
     if abs(value) >= 1e5:
-        return f"{value/1e5:.1f}L"
+        return f"{value / 1e5:.1f}L"
     if abs(value) >= 1e3:
-        return f"{value/1e3:.1f}K"
+        return f"{value / 1e3:.1f}K"
     return str(int(value))
 
 
@@ -313,24 +378,24 @@ def main():
         if args.output == "json":
             print(json.dumps(info, indent=2, default=str))
         else:
-            print(f"\n{'='*50}")
+            print(f"\n{'=' * 50}")
             print(f"  {info['name']} ({info['symbol']})")
-            print(f"{'='*50}")
+            print(f"{'=' * 50}")
             print(f"  Sector:         {info['sector']}")
             print(f"  Market Cap:     {format_inr(info['market_cap'])}")
             print(f"  CMP:            {format_inr(info['current_price'])}")
             print(f"  PE Ratio:       {info['pe_ratio'] or 'N/A'}")
             print(f"  PB Ratio:       {info['pb_ratio'] or 'N/A'}")
             print(f"  EPS:            ₹{info['eps'] or 'N/A'}")
-            roe_val = f"{info['roe']*100:.1f}%" if info['roe'] else "N/A"
+            roe_val = f"{info['roe'] * 100:.1f}%" if info["roe"] else "N/A"
             print(f"  ROE:            {roe_val}")
-            div_val = f"{info['dividend_yield']*100:.1f}%" if info['dividend_yield'] else "N/A"
+            div_val = f"{info['dividend_yield'] * 100:.1f}%" if info["dividend_yield"] else "N/A"
             print(f"  Div Yield:      {div_val}")
             print(f"  D/E Ratio:      {info['debt_to_equity'] or 'N/A'}")
             print(f"  52W High:       {format_inr(info['fifty_two_week_high'])}")
             print(f"  52W Low:        {format_inr(info['fifty_two_week_low'])}")
             print(f"  Beta:           {info['beta'] or 'N/A'}")
-            print(f"{'='*50}\n")
+            print(f"{'=' * 50}\n")
 
     if args.ohlcv:
         df = fetch_ohlcv(args.symbol, period=args.period)

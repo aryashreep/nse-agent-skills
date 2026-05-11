@@ -10,14 +10,15 @@ import sys
 from datetime import datetime
 from typing import Optional
 
-import numpy as np
 import pandas as pd
 import pandas_ta as ta
 
-from data_fetcher import fetch_ohlcv, fetch_stock_info, format_inr
+from data_fetcher import fetch_ohlcv, format_inr
 
 
-def compute_swing_indicators(df: pd.DataFrame, ema_fast: int = 9, ema_mid: int = 21, ema_slow: int = 55) -> pd.DataFrame:
+def compute_swing_indicators(
+    df: pd.DataFrame, ema_fast: int = 9, ema_mid: int = 21, ema_slow: int = 55
+) -> pd.DataFrame:
     """Compute all indicators needed for swing analysis."""
     df = df.copy()
 
@@ -125,19 +126,16 @@ def detect_signals(df: pd.DataFrame, lookback: int = 5) -> dict:
     """Detect swing trading signals."""
     latest = df.iloc[-1]
     prev = df.iloc[-2]
-    recent = df.tail(lookback)
 
     signals = {}
 
     # Triple EMA crossover
     if not any(pd.isna(x) for x in [latest["EMA_FAST"], latest["EMA_MID"], prev["EMA_FAST"], prev["EMA_MID"]]):
-        bullish_cross = prev["EMA_FAST"] <= prev["EMA_MID"] and latest["EMA_FAST"] > latest["EMA_MID"]
-        bearish_cross = prev["EMA_FAST"] >= prev["EMA_MID"] and latest["EMA_FAST"] < latest["EMA_MID"]
         # Check if crossover happened in lookback period
         cross_detected = False
         for i in range(1, min(lookback, len(df))):
             r = df.iloc[-i]
-            p = df.iloc[-i-1]
+            p = df.iloc[-i - 1]
             if p["EMA_FAST"] <= p["EMA_MID"] and r["EMA_FAST"] > r["EMA_MID"]:
                 signals["triple_ema_crossover"] = {"type": "BULLISH", "days_ago": i - 1}
                 cross_detected = True
@@ -162,9 +160,7 @@ def detect_signals(df: pd.DataFrame, lookback: int = 5) -> dict:
     signals["atr_expansion_ratio"] = atr_exp
 
     # Breakout retest
-    recent_high = recent["High"].max()
-    recent_low = recent["Low"].min()
-    prev_resistance = df.iloc[-lookback - 5:-lookback]["High"].max() if len(df) > lookback + 5 else None
+    prev_resistance = df.iloc[-lookback - 5 : -lookback]["High"].max() if len(df) > lookback + 5 else None
     if prev_resistance and not pd.isna(prev_resistance):
         # Price broke above resistance and retested
         if latest["Close"] > prev_resistance and latest["Low"] <= prev_resistance * 1.01:
@@ -286,9 +282,9 @@ def detect_ict_setups(df: pd.DataFrame) -> dict:
     highs = []
     lows = []
     for i in range(2, len(df) - 2):
-        if df.iloc[i]["High"] > df.iloc[i-1]["High"] and df.iloc[i]["High"] > df.iloc[i+1]["High"]:
+        if df.iloc[i]["High"] > df.iloc[i - 1]["High"] and df.iloc[i]["High"] > df.iloc[i + 1]["High"]:
             highs.append((i, df.iloc[i]["High"]))
-        if df.iloc[i]["Low"] < df.iloc[i-1]["Low"] and df.iloc[i]["Low"] < df.iloc[i+1]["Low"]:
+        if df.iloc[i]["Low"] < df.iloc[i - 1]["Low"] and df.iloc[i]["Low"] < df.iloc[i + 1]["Low"]:
             lows.append((i, df.iloc[i]["Low"]))
 
     if len(highs) >= 2 and len(lows) >= 2:
@@ -314,25 +310,29 @@ def detect_ict_setups(df: pd.DataFrame) -> dict:
         if curr["Close"] < curr["Open"]:  # Bearish candle
             move_pct = ((nxt["Close"] - curr["Close"]) / curr["Close"]) * 100
             if move_pct > 1.5:  # Strong bullish move
-                results["order_blocks"].append({
-                    "type": "BULLISH OB",
-                    "date": df.index[i].strftime("%Y-%m-%d"),
-                    "high": round(curr["High"], 2),
-                    "low": round(curr["Low"], 2),
-                    "strength": f"+{move_pct:.1f}%",
-                })
+                results["order_blocks"].append(
+                    {
+                        "type": "BULLISH OB",
+                        "date": df.index[i].strftime("%Y-%m-%d"),
+                        "high": round(curr["High"], 2),
+                        "low": round(curr["Low"], 2),
+                        "strength": f"+{move_pct:.1f}%",
+                    }
+                )
 
         # Bearish Order Block: bullish candle followed by strong bearish move
         if curr["Close"] > curr["Open"]:  # Bullish candle
             move_pct = ((curr["Close"] - nxt["Close"]) / curr["Close"]) * 100
             if move_pct > 1.5:
-                results["order_blocks"].append({
-                    "type": "BEARISH OB",
-                    "date": df.index[i].strftime("%Y-%m-%d"),
-                    "high": round(curr["High"], 2),
-                    "low": round(curr["Low"], 2),
-                    "strength": f"-{move_pct:.1f}%",
-                })
+                results["order_blocks"].append(
+                    {
+                        "type": "BEARISH OB",
+                        "date": df.index[i].strftime("%Y-%m-%d"),
+                        "high": round(curr["High"], 2),
+                        "low": round(curr["Low"], 2),
+                        "strength": f"-{move_pct:.1f}%",
+                    }
+                )
 
     # Keep only last 3 order blocks
     results["order_blocks"] = results["order_blocks"][-3:]
@@ -346,23 +346,27 @@ def detect_ict_setups(df: pd.DataFrame) -> dict:
 
         # Bullish FVG
         if c1["High"] < c3["Low"]:
-            results["fair_value_gaps"].append({
-                "type": "BULLISH FVG",
-                "date": df.index[i + 1].strftime("%Y-%m-%d"),
-                "top": round(c3["Low"], 2),
-                "bottom": round(c1["High"], 2),
-                "filled": df.iloc[-1]["Low"] <= c3["Low"],
-            })
+            results["fair_value_gaps"].append(
+                {
+                    "type": "BULLISH FVG",
+                    "date": df.index[i + 1].strftime("%Y-%m-%d"),
+                    "top": round(c3["Low"], 2),
+                    "bottom": round(c1["High"], 2),
+                    "filled": df.iloc[-1]["Low"] <= c3["Low"],
+                }
+            )
 
         # Bearish FVG
         if c1["Low"] > c3["High"]:
-            results["fair_value_gaps"].append({
-                "type": "BEARISH FVG",
-                "date": df.index[i + 1].strftime("%Y-%m-%d"),
-                "top": round(c1["Low"], 2),
-                "bottom": round(c3["High"], 2),
-                "filled": df.iloc[-1]["High"] >= c3["High"],
-            })
+            results["fair_value_gaps"].append(
+                {
+                    "type": "BEARISH FVG",
+                    "date": df.index[i + 1].strftime("%Y-%m-%d"),
+                    "top": round(c1["Low"], 2),
+                    "bottom": round(c3["High"], 2),
+                    "filled": df.iloc[-1]["High"] >= c3["High"],
+                }
+            )
 
     results["fair_value_gaps"] = results["fair_value_gaps"][-3:]
 
@@ -372,23 +376,27 @@ def detect_ict_setups(df: pd.DataFrame) -> dict:
         # Check if latest bar swept a swing high and closed below it
         for _, high_val in highs[-3:]:
             if latest["High"] > high_val and latest["Close"] < high_val:
-                results["liquidity_sweeps"].append({
-                    "type": "SWEEP OF HIGHS",
-                    "level": round(high_val, 2),
-                    "implication": "🔴 Bearish (sell-side liquidity taken)",
-                })
+                results["liquidity_sweeps"].append(
+                    {
+                        "type": "SWEEP OF HIGHS",
+                        "level": round(high_val, 2),
+                        "implication": "🔴 Bearish (sell-side liquidity taken)",
+                    }
+                )
         for _, low_val in lows[-3:]:
             if latest["Low"] < low_val and latest["Close"] > low_val:
-                results["liquidity_sweeps"].append({
-                    "type": "SWEEP OF LOWS",
-                    "level": round(low_val, 2),
-                    "implication": "🟢 Bullish (buy-side liquidity taken)",
-                })
+                results["liquidity_sweeps"].append(
+                    {
+                        "type": "SWEEP OF LOWS",
+                        "level": round(low_val, 2),
+                        "implication": "🟢 Bullish (buy-side liquidity taken)",
+                    }
+                )
 
     # OTE Zone (Optimal Trade Entry): 62-79% Fibonacci retracement
     if len(highs) >= 1 and len(lows) >= 1:
         recent_high = max(h[1] for h in highs[-3:])
-        recent_low = min(l[1] for l in lows[-3:])
+        recent_low = min(low[1] for low in lows[-3:])
         fib_range = recent_high - recent_low
         results["ote_zone"] = {
             "top": round(recent_high - fib_range * 0.618, 2),
@@ -400,11 +408,18 @@ def detect_ict_setups(df: pd.DataFrame) -> dict:
     return results
 
 
-def generate_report(symbol: str, df: pd.DataFrame, trend: dict, signals: dict,
-                    levels: dict, ict: Optional[dict] = None,
-                    ema_fast: int = 9, ema_mid: int = 21, ema_slow: int = 55) -> str:
+def generate_report(
+    symbol: str,
+    df: pd.DataFrame,
+    trend: dict,
+    signals: dict,
+    levels: dict,
+    ict: Optional[dict] = None,
+    ema_fast: int = 9,
+    ema_mid: int = 21,
+    ema_slow: int = 55,
+) -> str:
     """Generate a structured swing analysis report."""
-    latest = df.iloc[-1]
     now = datetime.now().strftime("%Y-%m-%d %H:%M IST")
 
     report = []
@@ -416,12 +431,22 @@ def generate_report(symbol: str, df: pd.DataFrame, trend: dict, signals: dict,
 
     # Trend Assessment
     report.append("📊 TREND ASSESSMENT")
-    report.append(f"  EMA {ema_fast}:   {format_inr(trend['ema_fast'])}  (Price {'above ✅' if trend['above_fast'] else 'below ❌'})")
-    report.append(f"  EMA {ema_mid}:  {format_inr(trend['ema_mid'])}  (Price {'above ✅' if trend['above_mid'] else 'below ❌'})")
-    report.append(f"  EMA {ema_slow}:  {format_inr(trend['ema_slow'])}  (Price {'above ✅' if trend['above_slow'] else 'below ❌'})")
-    report.append(f"  Alignment: {trend['alignment_emoji']} {trend['alignment']} ({ema_fast} {'>' if trend['alignment'] == 'BULLISH' else '<'} {ema_mid} {'>' if trend['alignment'] == 'BULLISH' else '<'} {ema_slow})")
+    report.append(
+        f"  EMA {ema_fast}:   {format_inr(trend['ema_fast'])}  (Price {'above ✅' if trend['above_fast'] else 'below ❌'})"
+    )
+    report.append(
+        f"  EMA {ema_mid}:  {format_inr(trend['ema_mid'])}  (Price {'above ✅' if trend['above_mid'] else 'below ❌'})"
+    )
+    report.append(
+        f"  EMA {ema_slow}:  {format_inr(trend['ema_slow'])}  (Price {'above ✅' if trend['above_slow'] else 'below ❌'})"
+    )
+    report.append(
+        f"  Alignment: {trend['alignment_emoji']} {trend['alignment']} ({ema_fast} {'>' if trend['alignment'] == 'BULLISH' else '<'} {ema_mid} {'>' if trend['alignment'] == 'BULLISH' else '<'} {ema_slow})"
+    )
     report.append(f"  ADX:      {trend['adx']:.1f} ({trend['trend_strength']})")
-    report.append(f"  RSI(14):  {trend['rsi']:.1f} ({'Overbought ⚠️' if trend['rsi'] > 70 else 'Oversold ⚠️' if trend['rsi'] < 30 else 'Neutral'})")
+    report.append(
+        f"  RSI(14):  {trend['rsi']:.1f} ({'Overbought ⚠️' if trend['rsi'] > 70 else 'Oversold ⚠️' if trend['rsi'] < 30 else 'Neutral'})"
+    )
     report.append("")
 
     # Signal Detection
@@ -430,12 +455,16 @@ def generate_report(symbol: str, df: pd.DataFrame, trend: dict, signals: dict,
     if cross:
         report.append(f"  Triple EMA Crossover:    ✅ {cross['type']} ({cross['days_ago']} days ago)")
     else:
-        report.append(f"  Triple EMA Crossover:    ❌ None detected")
+        report.append("  Triple EMA Crossover:    ❌ None detected")
 
-    report.append(f"  Volume Breakout:         {'✅' if signals['volume_breakout'] else '❌'} {signals['vol_ratio']:.1f}x average volume")
-    report.append(f"  ATR Expansion:           {'✅' if signals['atr_expansion'] else '🟡'} {signals['atr_expansion_ratio']:.1f}x")
-    retest_status = '✅' if signals['breakout_retest'] else '❌'
-    retest_detail = f" at {format_inr(signals['retest_level'])}" if signals['retest_level'] else ""
+    report.append(
+        f"  Volume Breakout:         {'✅' if signals['volume_breakout'] else '❌'} {signals['vol_ratio']:.1f}x average volume"
+    )
+    report.append(
+        f"  ATR Expansion:           {'✅' if signals['atr_expansion'] else '🟡'} {signals['atr_expansion_ratio']:.1f}x"
+    )
+    retest_status = "✅" if signals["breakout_retest"] else "❌"
+    retest_detail = f" at {format_inr(signals['retest_level'])}" if signals["retest_level"] else ""
     report.append(f"  Breakout Retest:         {retest_status}{retest_detail}")
 
     if signals.get("macd_bullish") is not None:
@@ -453,7 +482,9 @@ def generate_report(symbol: str, df: pd.DataFrame, trend: dict, signals: dict,
     report.append("")
 
     # Position Sizing
-    report.append(f"📐 POSITION SIZING ({format_inr(levels['risk_amount']/levels['risk_pct']*100 if levels['risk_pct'] > 0 else 1000000)} capital, {levels['risk_pct']}% risk)")
+    report.append(
+        f"📐 POSITION SIZING ({format_inr(levels['risk_amount'] / levels['risk_pct'] * 100 if levels['risk_pct'] > 0 else 1000000)} capital, {levels['risk_pct']}% risk)"
+    )
     report.append(f"  Risk Amount:    {format_inr(levels['risk_amount'])}")
     report.append(f"  Position Size:  {levels['position_size']} shares ({format_inr(levels['position_value'])})")
     report.append(f"  % of Capital:   {levels['pct_of_capital']}%")
@@ -540,8 +571,15 @@ def main():
 
     # Generate report
     report = generate_report(
-        args.symbol, df, trend, signals, levels, ict,
-        args.ema_fast, args.ema_mid, args.ema_slow,
+        args.symbol,
+        df,
+        trend,
+        signals,
+        levels,
+        ict,
+        args.ema_fast,
+        args.ema_mid,
+        args.ema_slow,
     )
     print(report)
 
