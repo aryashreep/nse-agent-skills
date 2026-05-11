@@ -106,12 +106,8 @@ def rank_by_relative_strength(
     try:
         nifty_df = fetch_ohlcv("NIFTY 50", period=period)
         if nifty_df.empty:
-            # Fallback: use ^NSEI
-            import yfinance as yf
-
-            nifty_df = yf.download("^NSEI", period=period, progress=False)
-            if isinstance(nifty_df.columns, pd.MultiIndex):
-                nifty_df.columns = nifty_df.columns.get_level_values(0)
+            # Fallback: use ^NSEI directly
+            nifty_df = fetch_ohlcv("^NSEI", period=period)
         nifty_return = ((nifty_df["Close"].iloc[-1] / nifty_df["Close"].iloc[0]) - 1) * 100
     except Exception:
         nifty_return = 0
@@ -210,11 +206,7 @@ def compare_sectors(
             continue
 
         try:
-            import yfinance as yf
-
-            df = yf.download(ticker, period=period, progress=False)
-            if isinstance(df.columns, pd.MultiIndex):
-                df.columns = df.columns.get_level_values(0)
+            df = fetch_ohlcv(ticker, period=period)
             if df.empty:
                 continue
 
@@ -278,11 +270,7 @@ def sector_rotation_quadrant(period: str = "6mo") -> str:
         if not ticker:
             continue
         try:
-            import yfinance as yf
-
-            df = yf.download(ticker, period=period, progress=False)
-            if isinstance(df.columns, pd.MultiIndex):
-                df.columns = df.columns.get_level_values(0)
+            df = fetch_ohlcv(ticker, period=period)
             if len(df) < 40:
                 continue
 

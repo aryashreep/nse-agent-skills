@@ -10,7 +10,6 @@ import sys
 from datetime import datetime
 
 import numpy as np
-import pandas as pd
 
 from data_fetcher import fetch_ohlcv, fetch_stock_info, format_inr
 
@@ -46,11 +45,7 @@ def compute_risk_metrics(
 
     # Beta (vs NIFTY 50)
     try:
-        import yfinance as yf
-
-        nifty = yf.download("^NSEI", period=period, progress=False)
-        if isinstance(nifty.columns, pd.MultiIndex):
-            nifty.columns = nifty.columns.get_level_values(0)
+        nifty = fetch_ohlcv("NIFTY 50", period=period)
         nifty_returns = nifty["Close"].pct_change().dropna()
         # Align dates
         common_idx = returns.index.intersection(nifty_returns.index)

@@ -59,6 +59,23 @@ def _safe_float(
     return f
 
 
+def _safe_bounded_float(
+    value: object,
+    low: float | None = None,
+    high: float | None = None,
+    default: float | None = None,
+) -> float | None:
+    """Coerce *value* to a finite float within [low, high], returning *default* if out of range."""
+    f = _safe_float(value, default)
+    if f is None:
+        return default
+    if low is not None and f < low:
+        return default
+    if high is not None and f > high:
+        return default
+    return f
+
+
 def fetch_ohlcv(
     symbol: str,
     period: str = "1y",
@@ -75,7 +92,7 @@ def fetch_ohlcv(
     Returns:
         DataFrame with Date, Open, High, Low, Close, Volume columns.
     """
-    ticker = f"{symbol}.NS"
+    ticker = symbol if symbol.startswith("^") or "." in symbol else f"{symbol}.NS"
     try:
         df = yf.download(ticker, period=period, interval=interval, progress=False)
         if df.empty:
@@ -190,6 +207,9 @@ def fetch_fii_dii(period_days: int = 30) -> pd.DataFrame:
     try:
         data = nse_get_fii_dii()
         df = pd.DataFrame(data)
+        for col in df.select_dtypes(include=[np.number]).columns:
+            df[col] = df[col].replace([np.inf, -np.inf], np.nan)
+        df.dropna(how="all", inplace=True)
         return df.head(period_days)
     except Exception as e:
         print(f"⚠️ FII/DII data fetch failed: {e}", file=sys.stderr)
@@ -350,14 +370,24 @@ def fetch_delivery_data(symbol: str, days: int = 20) -> pd.DataFrame:
                         file=sys.stderr,
                     )
                 else:
-                    return df.rename(
+                    df = df.rename(
                         columns={
                             "CH_TIMESTAMP": "date",
                             "DELIV_QTY": "delivery_qty",
                             "TTL_TRD_QNTY": "traded_qty",
                             "DELIV_PER": "delivery_pct",
                         }
-                    ).head(days)
+                    )
+                    for col in ["delivery_qty", "traded_qty", "delivery_pct"]:
+                        if col in df.columns:
+                            df[col] = pd.to_numeric(df[col], errors="coerce")
+                    df.replace([np.inf, -np.inf], np.nan, inplace=True)
+                    if "delivery_pct" in df.columns:
+                        df.loc[
+                            (df["delivery_pct"] < 0) | (df["delivery_pct"] > 100),
+                            "delivery_pct",
+                        ] = np.nan
+                    return df.head(days)
         except Exception:
             pass
 
