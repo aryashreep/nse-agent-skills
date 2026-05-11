@@ -7,9 +7,8 @@ Handles OHLCV, delivery data, FII/DII flows, and corporate actions.
 
 import argparse
 import json
-import math
-import re
 import sys
+from datetime import datetime, timedelta
 from typing import Optional
 
 import numpy as np
@@ -22,41 +21,6 @@ except ImportError:
     nse_eq = None
     nse_get_fii_dii = None
     nsefetch = None
-
-
-# ---------------------------------------------------------------------------
-# Validation helpers (W011 mitigation)
-# ---------------------------------------------------------------------------
-
-_ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
-_CONTROL_CHARS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
-
-
-def _sanitize_str(value: object, default: str = "") -> str:
-    """Strip ANSI escape codes, control characters, and newlines from a string."""
-    if value is None:
-        return default
-    s = str(value)
-    s = _ANSI_RE.sub("", s)
-    s = _CONTROL_CHARS.sub("", s)
-    s = s.replace("\n", " ").replace("\r", "")
-    return s.strip()
-
-
-def _safe_float(
-    value: object,
-    default: Optional[float] = None,
-) -> Optional[float]:
-    """Coerce *value* to a finite float, returning *default* on failure."""
-    if value is None:
-        return default
-    try:
-        f = float(value)
-    except (TypeError, ValueError):
-        return default
-    if not math.isfinite(f):
-        return default
-    return f
 
 
 def fetch_ohlcv(
@@ -83,17 +47,9 @@ def fetch_ohlcv(
         # Flatten multi-level columns if present
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
-        required = ["Open", "High", "Low", "Close", "Volume"]
-        missing = [c for c in required if c not in df.columns]
-        if missing:
-            raise ValueError(f"Missing columns in OHLCV data: {missing}")
-        df = df[required].copy()
+        df = df[["Open", "High", "Low", "Close", "Volume"]].copy()
         df.index.name = "Date"
-        # Replace Inf/-Inf with NaN, then drop any rows with NaN
-        df.replace([np.inf, -np.inf], np.nan, inplace=True)
         df.dropna(inplace=True)
-        # Drop rows where Close is non-positive
-        df = df[df["Close"] > 0]
         return df
     except Exception as e:
         print(f"⚠️ ERROR: Failed to fetch data for {symbol}: {e}", file=sys.stderr)
@@ -109,29 +65,28 @@ def fetch_stock_info(symbol: str) -> dict:
     """
     ticker = yf.Ticker(f"{symbol}.NS")
     info = ticker.info
-    market_cap = _safe_float(info.get("marketCap"), 0) or 0
     return {
         "symbol": symbol,
-        "name": _sanitize_str(info.get("longName"), symbol),
-        "sector": _sanitize_str(info.get("sector"), "N/A"),
-        "industry": _sanitize_str(info.get("industry"), "N/A"),
-        "market_cap": market_cap,
-        "market_cap_cr": round(market_cap / 1e7, 2),
-        "pe_ratio": _safe_float(info.get("trailingPE")),
-        "forward_pe": _safe_float(info.get("forwardPE")),
-        "pb_ratio": _safe_float(info.get("priceToBook")),
-        "eps": _safe_float(info.get("trailingEps")),
-        "dividend_yield": _safe_float(info.get("dividendYield")),
-        "roe": _safe_float(info.get("returnOnEquity")),
-        "debt_to_equity": _safe_float(info.get("debtToEquity")),
-        "book_value": _safe_float(info.get("bookValue")),
-        "revenue_growth": _safe_float(info.get("revenueGrowth")),
-        "earnings_growth": _safe_float(info.get("earningsGrowth")),
-        "current_price": _safe_float(info.get("currentPrice", info.get("regularMarketPrice"))),
-        "fifty_two_week_high": _safe_float(info.get("fiftyTwoWeekHigh")),
-        "fifty_two_week_low": _safe_float(info.get("fiftyTwoWeekLow")),
-        "avg_volume": _safe_float(info.get("averageVolume")),
-        "beta": _safe_float(info.get("beta")),
+        "name": info.get("longName", symbol),
+        "sector": info.get("sector", "N/A"),
+        "industry": info.get("industry", "N/A"),
+        "market_cap": info.get("marketCap", 0),
+        "market_cap_cr": round(info.get("marketCap", 0) / 1e7, 2),
+        "pe_ratio": info.get("trailingPE", None),
+        "forward_pe": info.get("forwardPE", None),
+        "pb_ratio": info.get("priceToBook", None),
+        "eps": info.get("trailingEps", None),
+        "dividend_yield": info.get("dividendYield", None),
+        "roe": info.get("returnOnEquity", None),
+        "debt_to_equity": info.get("debtToEquity", None),
+        "book_value": info.get("bookValue", None),
+        "revenue_growth": info.get("revenueGrowth", None),
+        "earnings_growth": info.get("earningsGrowth", None),
+        "current_price": info.get("currentPrice", info.get("regularMarketPrice", None)),
+        "fifty_two_week_high": info.get("fiftyTwoWeekHigh", None),
+        "fifty_two_week_low": info.get("fiftyTwoWeekLow", None),
+        "avg_volume": info.get("averageVolume", None),
+        "beta": info.get("beta", None),
     }
 
 
@@ -151,22 +106,21 @@ def fetch_nse_quote(symbol: str) -> Optional[dict]:
             return None
         price_info = data.get("priceInfo", {})
         security_info = data.get("securityInfo", {})
-        intra = price_info.get("intraDayHighLow", {})
         return {
             "symbol": symbol,
-            "last_price": _safe_float(price_info.get("lastPrice")),
-            "change": _safe_float(price_info.get("change")),
-            "pct_change": _safe_float(price_info.get("pChange")),
-            "open": _safe_float(price_info.get("open")),
-            "high": _safe_float(intra.get("max")),
-            "low": _safe_float(intra.get("min")),
-            "prev_close": _safe_float(price_info.get("previousClose")),
-            "vwap": _safe_float(price_info.get("vwap")),
-            "total_traded_volume": _safe_float(price_info.get("totalTradedVolume")),
-            "total_traded_value": _safe_float(price_info.get("totalTradedValue")),
+            "last_price": price_info.get("lastPrice"),
+            "change": price_info.get("change"),
+            "pct_change": price_info.get("pChange"),
+            "open": price_info.get("open"),
+            "high": price_info.get("intraDayHighLow", {}).get("max"),
+            "low": price_info.get("intraDayHighLow", {}).get("min"),
+            "prev_close": price_info.get("previousClose"),
+            "vwap": price_info.get("vwap"),
+            "total_traded_volume": price_info.get("totalTradedVolume"),
+            "total_traded_value": price_info.get("totalTradedValue"),
             "delivery_pct": None,  # Requires separate delivery data endpoint
-            "face_value": _safe_float(security_info.get("faceValue")),
-            "issued_size": _safe_float(security_info.get("issuedSize")),
+            "face_value": security_info.get("faceValue"),
+            "issued_size": security_info.get("issuedSize"),
         }
     except Exception as e:
         print(f"⚠️ NSE quote fetch failed for {symbol}: {e}", file=sys.stderr)
@@ -186,7 +140,9 @@ def fetch_fii_dii(period_days: int = 30) -> pd.DataFrame:
     if nse_get_fii_dii is None:
         print("⚠️ nsepython not available. Using sample FII/DII data.", file=sys.stderr)
         # Return empty DataFrame with correct schema
-        return pd.DataFrame(columns=["date", "fii_buy", "fii_sell", "fii_net", "dii_buy", "dii_sell", "dii_net"])
+        return pd.DataFrame(columns=[
+            "date", "fii_buy", "fii_sell", "fii_net", "dii_buy", "dii_sell", "dii_net"
+        ])
     try:
         data = nse_get_fii_dii()
         df = pd.DataFrame(data)
@@ -209,97 +165,32 @@ def fetch_nifty_constituents(index: str = "NIFTY 50") -> list[str]:
     """
     index_map = {
         "NIFTY50": [
-            "RELIANCE",
-            "TCS",
-            "HDFCBANK",
-            "INFY",
-            "ICICIBANK",
-            "HINDUNILVR",
-            "SBIN",
-            "BHARTIARTL",
-            "ITC",
-            "KOTAKBANK",
-            "LT",
-            "AXISBANK",
-            "BAJFINANCE",
-            "ASIANPAINT",
-            "MARUTI",
-            "HCLTECH",
-            "TITAN",
-            "SUNPHARMA",
-            "TATAMOTORS",
-            "ULTRACEMCO",
-            "WIPRO",
-            "NESTLEIND",
-            "NTPC",
-            "POWERGRID",
-            "M&M",
-            "JSWSTEEL",
-            "ADANIENT",
-            "ADANIPORTS",
-            "TATASTEEL",
-            "BAJAJFINSV",
-            "TECHM",
-            "ONGC",
-            "HDFCLIFE",
-            "DIVISLAB",
-            "COALINDIA",
-            "GRASIM",
-            "BPCL",
-            "DRREDDY",
-            "CIPLA",
-            "APOLLOHOSP",
-            "EICHERMOT",
-            "TATACONSUM",
-            "SBILIFE",
-            "BRITANNIA",
-            "HEROMOTOCO",
-            "INDUSINDBK",
-            "BAJAJ-AUTO",
-            "HINDALCO",
-            "UPL",
-            "LTIM",
+            "RELIANCE", "TCS", "HDFCBANK", "INFY", "ICICIBANK", "HINDUNILVR",
+            "SBIN", "BHARTIARTL", "ITC", "KOTAKBANK", "LT", "AXISBANK",
+            "BAJFINANCE", "ASIANPAINT", "MARUTI", "HCLTECH", "TITAN",
+            "SUNPHARMA", "TATAMOTORS", "ULTRACEMCO", "WIPRO", "NESTLEIND",
+            "NTPC", "POWERGRID", "M&M", "JSWSTEEL", "ADANIENT", "ADANIPORTS",
+            "TATASTEEL", "BAJAJFINSV", "TECHM", "ONGC", "HDFCLIFE",
+            "DIVISLAB", "COALINDIA", "GRASIM", "BPCL", "DRREDDY",
+            "CIPLA", "APOLLOHOSP", "EICHERMOT", "TATACONSUM", "SBILIFE",
+            "BRITANNIA", "HEROMOTOCO", "INDUSINDBK", "BAJAJ-AUTO",
+            "HINDALCO", "UPL", "LTIM",
         ],
         "NIFTY100": [],  # Extend as needed
         "NIFTY200": [],
         "NIFTY500": [],
         "NIFTY BANK": [
-            "HDFCBANK",
-            "ICICIBANK",
-            "SBIN",
-            "KOTAKBANK",
-            "AXISBANK",
-            "INDUSINDBK",
-            "BANKBARODA",
-            "PNB",
-            "FEDERALBNK",
-            "IDFCFIRSTB",
-            "BANDHANBNK",
-            "AUBANK",
+            "HDFCBANK", "ICICIBANK", "SBIN", "KOTAKBANK", "AXISBANK",
+            "INDUSINDBK", "BANKBARODA", "PNB", "FEDERALBNK", "IDFCFIRSTB",
+            "BANDHANBNK", "AUBANK",
         ],
         "NIFTY IT": [
-            "TCS",
-            "INFY",
-            "HCLTECH",
-            "WIPRO",
-            "TECHM",
-            "LTIM",
-            "MPHASIS",
-            "COFORGE",
-            "PERSISTENT",
-            "LTTS",
+            "TCS", "INFY", "HCLTECH", "WIPRO", "TECHM", "LTIM",
+            "MPHASIS", "COFORGE", "PERSISTENT", "LTTS",
         ],
         "NIFTY PHARMA": [
-            "SUNPHARMA",
-            "DRREDDY",
-            "CIPLA",
-            "DIVISLAB",
-            "APOLLOHOSP",
-            "BIOCON",
-            "LUPIN",
-            "AUROPHARMA",
-            "TORNTPHARM",
-            "ALKEM",
+            "SUNPHARMA", "DRREDDY", "CIPLA", "DIVISLAB", "APOLLOHOSP",
+            "BIOCON", "LUPIN", "AUROPHARMA", "TORNTPHARM", "ALKEM",
         ],
     }
     # Normalize index name
@@ -342,22 +233,14 @@ def fetch_delivery_data(symbol: str, days: int = 20) -> pd.DataFrame:
             data = nsefetch(url)
             if data and "data" in data:
                 df = pd.DataFrame(data["data"])
-                try:
-                    df = df[["CH_TIMESTAMP", "DELIV_QTY", "TTL_TRD_QNTY", "DELIV_PER"]]
-                except KeyError as exc:
-                    print(
-                        f"⚠️ Delivery data missing expected columns for {symbol}: {exc}",
-                        file=sys.stderr,
-                    )
-                else:
-                    return df.rename(
-                        columns={
-                            "CH_TIMESTAMP": "date",
-                            "DELIV_QTY": "delivery_qty",
-                            "TTL_TRD_QNTY": "traded_qty",
-                            "DELIV_PER": "delivery_pct",
-                        }
-                    ).head(days)
+                return df[["CH_TIMESTAMP", "DELIV_QTY", "TTL_TRD_QNTY", "DELIV_PER"]].rename(
+                    columns={
+                        "CH_TIMESTAMP": "date",
+                        "DELIV_QTY": "delivery_qty",
+                        "TTL_TRD_QNTY": "traded_qty",
+                        "DELIV_PER": "delivery_pct",
+                    }
+                ).head(days)
         except Exception:
             pass
 
@@ -371,9 +254,9 @@ def format_inr(value: float) -> str:
     if value is None:
         return "N/A"
     if abs(value) >= 1e7:
-        return f"₹{value / 1e7:,.2f} Cr"
+        return f"₹{value/1e7:,.2f} Cr"
     if abs(value) >= 1e5:
-        return f"₹{value / 1e5:,.2f} L"
+        return f"₹{value/1e5:,.2f} L"
     return f"₹{value:,.2f}"
 
 
@@ -382,11 +265,11 @@ def format_volume(value: float) -> str:
     if value is None:
         return "N/A"
     if abs(value) >= 1e7:
-        return f"{value / 1e7:.1f}Cr"
+        return f"{value/1e7:.1f}Cr"
     if abs(value) >= 1e5:
-        return f"{value / 1e5:.1f}L"
+        return f"{value/1e5:.1f}L"
     if abs(value) >= 1e3:
-        return f"{value / 1e3:.1f}K"
+        return f"{value/1e3:.1f}K"
     return str(int(value))
 
 
@@ -430,24 +313,24 @@ def main():
         if args.output == "json":
             print(json.dumps(info, indent=2, default=str))
         else:
-            print(f"\n{'=' * 50}")
+            print(f"\n{'='*50}")
             print(f"  {info['name']} ({info['symbol']})")
-            print(f"{'=' * 50}")
+            print(f"{'='*50}")
             print(f"  Sector:         {info['sector']}")
             print(f"  Market Cap:     {format_inr(info['market_cap'])}")
             print(f"  CMP:            {format_inr(info['current_price'])}")
             print(f"  PE Ratio:       {info['pe_ratio'] or 'N/A'}")
             print(f"  PB Ratio:       {info['pb_ratio'] or 'N/A'}")
             print(f"  EPS:            ₹{info['eps'] or 'N/A'}")
-            roe_val = f"{info['roe'] * 100:.1f}%" if info["roe"] else "N/A"
+            roe_val = f"{info['roe']*100:.1f}%" if info['roe'] else "N/A"
             print(f"  ROE:            {roe_val}")
-            div_val = f"{info['dividend_yield'] * 100:.1f}%" if info["dividend_yield"] else "N/A"
+            div_val = f"{info['dividend_yield']*100:.1f}%" if info['dividend_yield'] else "N/A"
             print(f"  Div Yield:      {div_val}")
             print(f"  D/E Ratio:      {info['debt_to_equity'] or 'N/A'}")
             print(f"  52W High:       {format_inr(info['fifty_two_week_high'])}")
             print(f"  52W Low:        {format_inr(info['fifty_two_week_low'])}")
             print(f"  Beta:           {info['beta'] or 'N/A'}")
-            print(f"{'=' * 50}\n")
+            print(f"{'='*50}\n")
 
     if args.ohlcv:
         df = fetch_ohlcv(args.symbol, period=args.period)
