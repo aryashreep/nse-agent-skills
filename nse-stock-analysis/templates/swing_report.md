@@ -91,7 +91,7 @@ RSI(14) at {{RSI}} indicates {{RSI_CONDITION}}. {{VOLUME_NOTE}}.
 - Always use a stop-loss. Never risk more than 2% of capital per trade.
 - Past patterns do not guarantee future results.
 - Consult a SEBI-registered investment advisor for personalized advice.
-- Data sourced from public APIs — verify independently before acting.
+- Data sourced from public APIs - verify independently before acting.
 
 ---
 

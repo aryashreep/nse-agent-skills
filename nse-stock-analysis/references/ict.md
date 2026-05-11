@@ -15,7 +15,7 @@ Market structure refers to the pattern of swing highs and swing lows.
 **Bullish Structure:** Higher Highs (HH) + Higher Lows (HL)
 **Bearish Structure:** Lower Highs (LH) + Lower Lows (LL)
 
-**Market Structure Shift (MSS):** When the prevailing structure breaks — e.g., a bullish market makes a Lower Low, signaling potential trend reversal.
+**Market Structure Shift (MSS):** When the prevailing structure breaks - e.g., a bullish market makes a Lower Low, signaling potential trend reversal.
 
 **Break of Structure (BOS):** Price breaks a significant swing high/low confirming trend continuation.
 
@@ -71,19 +71,19 @@ ICT Kill Zones are specific time windows when institutional activity peaks.
 
 | Kill Zone | Original (ET) | IST Equivalent | Relevance to NSE |
 |-----------|---------------|----------------|-------------------|
-| Asian Session | 8:00 PM - 12:00 AM ET | 5:30 AM - 10:30 AM IST | **NSE Market Open** — highest relevance |
-| London Open | 2:00 AM - 5:00 AM ET | 12:30 PM - 3:30 PM IST | **NSE Afternoon** — moderate relevance |
+| Asian Session | 8:00 PM - 12:00 AM ET | 5:30 AM - 10:30 AM IST | **NSE Market Open** - highest relevance |
+| London Open | 2:00 AM - 5:00 AM ET | 12:30 PM - 3:30 PM IST | **NSE Afternoon** - moderate relevance |
 | NY Open | 8:00 AM - 11:00 AM ET | 6:30 PM - 9:30 PM IST | Post-market for NSE |
 
 **For NSE:**
-- **9:15 AM - 10:30 AM IST:** Opening kill zone — highest volume, institutional activity
-- **2:00 PM - 3:30 PM IST:** Closing kill zone — second-highest volume
+- **9:15 AM - 10:30 AM IST:** Opening kill zone - highest volume, institutional activity
+- **2:00 PM - 3:30 PM IST:** Closing kill zone - second-highest volume
 
 ### 7. Premium & Discount Zones
 
 Using the equilibrium (50% level) of a range:
-- **Premium Zone (above 50%):** Sell zone — price is expensive
-- **Discount Zone (below 50%):** Buy zone — price is cheap
+- **Premium Zone (above 50%):** Sell zone - price is expensive
+- **Discount Zone (below 50%):** Buy zone - price is cheap
 
 ---
 
@@ -93,7 +93,7 @@ Using the equilibrium (50% level) of a range:
 1. **Trading Hours:** NSE trades 9:15 AM - 3:30 PM IST (pre-market from 9:00 AM)
 2. **Circuit Limits:** NSE has upper/lower circuit limits that can prevent fills
 3. **No After-Hours:** Limited after-hours activity; gaps are primarily overnight
-4. **FII/DII Flows:** Institutional flows are tracked publicly — use as confluence
+4. **FII/DII Flows:** Institutional flows are tracked publicly - use as confluence
 5. **Delivery %:** High delivery percentage on OB tests confirms institutional interest
 
 ### Best ICT Setups for NSE
@@ -122,7 +122,7 @@ Using the equilibrium (50% level) of a range:
 
 ## Limitations
 
-- ICT concepts are **discretionary** — they require practice and context
+- ICT concepts are **discretionary** - they require practice and context
 - Not all order blocks hold; use confluence for higher-probability trades
 - Works best on liquid, large-cap stocks (NIFTY 50 constituents)
-- Always combine with risk management — no setup is 100% reliable
+- Always combine with risk management - no setup is 100% reliable

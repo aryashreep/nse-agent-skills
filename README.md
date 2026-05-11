@@ -1,6 +1,6 @@
 # NSE Agent Skills
 
-Production-grade [SKILLS.sh](https://skills.sh) skill for **Indian equity market (NSE)** analysis — screening, valuation, swing trading, sector rotation, backtesting, and risk management.
+Production-grade [SKILLS.sh](https://skills.sh) skill for **Indian equity market (NSE)** analysis - screening, valuation, swing trading, sector rotation, backtesting, and risk management.
 
 ## Skills
 
@@ -62,16 +62,16 @@ nse-agent-skills/
 
 ## Supported Workflows
 
-1. **Swing Trading Analysis** — EMA alignment, breakout detection, volume confirmation
-2. **ICT Setup Analysis** — Order blocks, fair value gaps, liquidity sweeps
-3. **Triple EMA Crossover Scanner** — 9/21/55 EMA crossover signals
-4. **Breakout Detection** — Volume breakout, ATR expansion, retest logic
-5. **Backtesting** — Historical strategy testing with vectorbt/backtesting.py
-6. **Sector Comparison** — Relative strength ranking across NIFTY sectors
-7. **Valuation** — DCF, PE/PB multiples, Graham number, PEG ratio
-8. **Risk Scoring** — Portfolio-level beta, VaR, max drawdown, Sharpe ratio
-9. **FII/DII Tracking** — Institutional flow analysis
-10. **Delivery Breakout** — Delivery % spike detection for accumulation signals
+1. **Swing Trading Analysis** - EMA alignment, breakout detection, volume confirmation
+2. **ICT Setup Analysis** - Order blocks, fair value gaps, liquidity sweeps
+3. **Triple EMA Crossover Scanner** - 9/21/55 EMA crossover signals
+4. **Breakout Detection** - Volume breakout, ATR expansion, retest logic
+5. **Backtesting** - Historical strategy testing with vectorbt/backtesting.py
+6. **Sector Comparison** - Relative strength ranking across NIFTY sectors
+7. **Valuation** - DCF, PE/PB multiples, Graham number, PEG ratio
+8. **Risk Scoring** - Portfolio-level beta, VaR, max drawdown, Sharpe ratio
+9. **FII/DII Tracking** - Institutional flow analysis
+10. **Delivery Breakout** - Delivery % spike detection for accumulation signals
 
 ## Disclaimer
 

@@ -96,7 +96,7 @@ This reference covers NSE/BSE market structure, trading hours, regulatory framew
 ### Key SEBI Regulations for Traders
 
 1. **Insider Trading:** Trading based on unpublished price-sensitive information is prohibited
-2. **Front Running:** Prohibited — executing orders ahead of large client orders
+2. **Front Running:** Prohibited - executing orders ahead of large client orders
 3. **Market Manipulation:** Creating artificial volume or price is prohibited
 4. **Disclosure:** Promoters must disclose stake changes > 2%
 5. **Short Selling:** Allowed for institutional investors with disclosure
@@ -135,16 +135,16 @@ This reference covers NSE/BSE market structure, trading hours, regulatory framew
 
 - **Delivery %** = (Delivered Quantity / Total Traded Quantity) × 100
 - High delivery % suggests genuine buying/selling (not speculative)
-- Average delivery % varies by stock — compare to its own average
+- Average delivery % varies by stock - compare to its own average
 
 ### Interpretation
 
 | Delivery % | Interpretation |
 |-----------|---------------|
 | > 70% | Strong institutional interest |
-| 50-70% | Moderate — mixed retail/institutional |
+| 50-70% | Moderate - mixed retail/institutional |
 | 30-50% | Speculative activity dominates |
-| < 30% | Highly speculative — mostly intraday traders |
+| < 30% | Highly speculative - mostly intraday traders |
 
 ### Delivery Breakout Signal
 
@@ -177,7 +177,7 @@ THEN → Institutional accumulation signal
 3. **Order Types:** Market, Limit, Stop-Loss, Stop-Loss Market, AMO
 4. **Auction:** Special call auction for illiquid stocks
 5. **Block Deals:** Minimum ₹10 Cr, executed in separate window (8:45-9:00 AM)
-6. **Bulk Deals:** > 0.5% of equity shares — must be disclosed to exchange
+6. **Bulk Deals:** > 0.5% of equity shares - must be disclosed to exchange
 
 ---
 

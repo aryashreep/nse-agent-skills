@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document defines the risk management rules applied to all trading and investment analysis produced by the NSE Stock Analysis skill. Risk management is non-negotiable — every trade setup must include defined risk parameters.
+This document defines the risk management rules applied to all trading and investment analysis produced by the NSE Stock Analysis skill. Risk management is non-negotiable - every trade setup must include defined risk parameters.
 
 ---
 
@@ -12,7 +12,7 @@ This document defines the risk management rules applied to all trading and inves
 2. **Defined Risk:** Every trade must have a pre-defined stop-loss before entry
 3. **Position Sizing:** Size positions based on risk, not conviction
 4. **Portfolio Heat:** Monitor aggregate portfolio risk at all times
-5. **Systematic Rules:** Follow rules consistently — no exceptions for "high conviction" trades
+5. **Systematic Rules:** Follow rules consistently - no exceptions for "high conviction" trades
 
 ---
 
@@ -124,11 +124,11 @@ IF Portfolio Heat > 6%:
 
 | Drawdown Level | Action |
 |---------------|--------|
-| 0-5% | Normal trading — continue |
+| 0-5% | Normal trading - continue |
 | 5-10% | Reduce position sizes by 50% |
 | 10-15% | Reduce to 1-2 positions only |
 | > 15% | Stop trading, review strategy |
-| > 20% | Full stop — take a break, analyze what went wrong |
+| > 20% | Full stop - take a break, analyze what went wrong |
 
 ---
 
@@ -149,7 +149,7 @@ IF Portfolio Heat > 6%:
 ### Circuit Limits
 
 - **Upper/Lower Circuit:** Some stocks can be locked in circuit, preventing exit
-- **Index Stocks:** NIFTY 50 stocks rarely hit circuits — prefer these for trading
+- **Index Stocks:** NIFTY 50 stocks rarely hit circuits - prefer these for trading
 - **Avoid:** Stocks with regular circuit hits unless specifically trading the pattern
 
 ### Settlement
@@ -184,4 +184,4 @@ IF Portfolio Heat > 6%:
 2. **No FOMO entries:** If you missed an entry, wait for the next setup
 3. **Plan the trade, trade the plan:** Don't modify stops or targets mid-trade without new information
 4. **Daily loss limit:** Stop trading if you lose 3% of capital in a single day
-5. **Weekly review:** Review all trades weekly — look for pattern in losses
+5. **Weekly review:** Review all trades weekly - look for pattern in losses
