@@ -1,4 +1,4 @@
-# nse-agent-skills
+# NSE Agent Skills
 
 Production-grade [SKILLS.sh](https://skills.sh) skill for **Indian equity market (NSE)** analysis — screening, valuation, swing trading, sector rotation, backtesting, and risk management.
 
