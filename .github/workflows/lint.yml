@@ -65,7 +65,7 @@ jobs:
         run: |
           cd nse-stock-analysis/scripts
           python -c "
-          import importlib, sys, pathlib
+          import importlib.util, sys, pathlib
           scripts = sorted(pathlib.Path('.').glob('*.py'))
           failed = []
           for s in scripts:

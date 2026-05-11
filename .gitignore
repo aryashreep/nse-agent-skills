@@ -27,3 +27,9 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+# Agent cache
+.agents/
+
+# Claude Code local config
+.claude/
