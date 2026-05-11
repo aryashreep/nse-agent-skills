@@ -18,7 +18,9 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements-dev.txt
+          pip install pandas numpy yfinance
 
       - name: Ruff lint
         run: ruff check nse-stock-analysis/scripts/
