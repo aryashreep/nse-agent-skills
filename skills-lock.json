@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "nse-stock-analysis": {
+      "source": "aryashreep/nse-agent-skills",
+      "sourceType": "github",
+      "skillPath": "nse-stock-analysis/SKILL.md",
+      "computedHash": "fd179b46bf465f25d06db43f6fcf23a2ecfb6c27c90337594b456e171a2b3929"
+    }
+  }
+}

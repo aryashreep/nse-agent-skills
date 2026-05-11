@@ -1,0 +1,12 @@
+# Runtime dependencies
+nsepython>=0.5
+yfinance>=0.2.18
+pandas>=2.0
+pandas_ta>=0.3.14
+numpy>=1.24
+vectorbt>=0.26
+backtesting>=0.3.3
+
+# Dev / CI
+ruff>=0.4
+mypy>=1.10

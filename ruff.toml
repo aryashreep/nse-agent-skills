@@ -1,0 +1,11 @@
+target-version = "py39"
+line-length = 120
+
+exclude = [".agents/"]
+
+[lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = ["E501"]
+
+[lint.isort]
+known-first-party = ["data_fetcher"]
