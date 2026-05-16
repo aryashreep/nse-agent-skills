@@ -6,7 +6,7 @@ Production-grade [SKILLS.sh](https://skills.sh) skill for Indian equity market a
 
 | Skill | Description |
 |---|---|
-| [nse-stock-analysis](./nse-stock-analysis/) | Comprehensive NSE stock analysis with technical indicators, ICT concepts, PPA scanning, swing trading, backtesting, FII/DII tracking, and institutional-grade reporting |
+| [nse-stock-analysis](./nse-stock-analysis/) | Comprehensive NSE and Nifty stock analysis with technical indicators, ICT concepts, PPA scanning, swing trading, backtesting, FII/DII tracking, and institutional-grade reporting |
 
 ## Quick Start
 
