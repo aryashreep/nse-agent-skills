@@ -1,7 +1,7 @@
 ---
 name: nse-stock-analysis
 description: >-
-  Professional NSE stock analysis with screening, swing trading, ICT concepts,
+  Professional NSE and Nifty stock analysis with screening, swing trading, ICT concepts,
   backtesting, sector rotation, valuation, and risk management for Indian equity
   markets. Use when the user asks to analyze NSE stocks, screen for trade setups,
   backtest strategies, compare sectors, assess risk, or check FII/DII flows.
@@ -11,9 +11,9 @@ metadata:
   version: "1.0.0"
 ---
 
-# NSE Stock Analysis
+# NSE and Nifty Stock Analysis
 
-A production-grade Indian equity market analysis tool for NSE-listed stocks. Provides institutional-quality screening, swing trading analysis, ICT-based setups, backtesting, valuation, sector rotation, and risk management - all powered by public market data.
+A production-grade Indian equity market analysis tool for NSE and Nifty listed stocks. Provides institutional-quality screening, swing trading analysis, ICT-based setups, backtesting, valuation, sector rotation, and risk management - all powered by public market data.
 
 **Target users:** Swing traders, positional traders, value investors, and systematic analysts operating in Indian equity markets (NSE/BSE).
 
@@ -23,7 +23,7 @@ A production-grade Indian equity market analysis tool for NSE-listed stocks. Pro
 
 Activate this skill when the user:
 
-- Asks to **analyze an NSE stock** (e.g., "Analyze RELIANCE", "What's the setup on HDFCBANK?")
+- Asks to **analyze an NSE/Nifty stock** (e.g., "Analyze RELIANCE", "What's the setup on HDFCBANK?")
 - Requests **stock screening** (e.g., "Find oversold large caps", "Screen for breakout candidates")
 - Wants **swing trading analysis** (e.g., "Swing trade setup for TCS", "Is INFY in a trend?")
 - Asks about **ICT concepts** on a stock (e.g., "Show order blocks on SBIN", "Find fair value gaps on NIFTY")
