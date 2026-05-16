@@ -218,7 +218,7 @@ python scripts/screener.py \
 
 Detects stocks with unusual volume surge (>2x average) accompanied by significant price movement.
 
-#### PPA Scanner (Price-Price Action)
+#### PA Scanner (Price Action)
 
 ```bash
 python scripts/screener.py \
