@@ -7,7 +7,7 @@ description: >-
   backtest strategies, compare sectors, assess risk, or check FII/DII flows.
 compatibility: Requires Python 3.9+ with nsepython, yfinance, pandas, pandas_ta, numpy, vectorbt, backtesting
 metadata:
-  author: aryashree-p
+  author: aryashreep
   version: "1.0.0"
 ---
 
